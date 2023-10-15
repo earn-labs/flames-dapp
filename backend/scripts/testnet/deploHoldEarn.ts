@@ -1,5 +1,5 @@
 import {ethers} from "ethers";
-import {ERC20Basic, ERC20Basic__factory} from "../../typechain-types";
+import {ERC20Reflections__factory} from "../../typechain-types";
 import * as dotenv from "dotenv";
 dotenv.config();
 
@@ -14,10 +14,10 @@ async function main() {
 
     // define provider and deployer
     const provider = new ethers.JsonRpcProvider(
-        process.env.RPC_ENDPOINT_URL_MAINNET ?? ""
+        process.env.RPC_ENDPOINT_URL_TESTNET ?? ""
     );
     const wallet = new ethers.Wallet(
-        process.env.DEPLOYER_PRIVATE_KEY ?? "",
+        process.env.PRIVATE_KEY ?? "",
         provider
     );
 
@@ -31,10 +31,10 @@ async function main() {
     }
 
     // deploy contract
-    const owner = process.env.OWNER_ADDRESS_MAINNET as string;
+    const owner = process.env.OWNER_ADDRESS_TESTNET as string;
 
-    const contractFactory = new ERC20Basic__factory(wallet);
-    const contract = await contractFactory.deploy(owner);
+    const contractFactory = new ERC20Reflections__factory(wallet);
+    const contract = await contractFactory.deploy(name, symbol, owner);
     await contract.waitForDeployment();
     const contractAddress = await contract.getAddress();
     console.log(`Token contract deployed at ${ contractAddress }`);

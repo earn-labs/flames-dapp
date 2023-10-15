@@ -1,22 +1,23 @@
 import {ethers} from "ethers";
-import {ERC20Basic__factory} from "../../typechain-types";
+import {HoldEarn, HoldEarn__factory} from "../../typechain-types";
 import * as dotenv from "dotenv";
 dotenv.config();
 
 async function main() {
 
     // variables for contract creation: adjust as needed
-    const name = "MyToken";
-    const symbol = "MTK";
+    const name = "HOLD";
+    const symbol = "EARN";
     const decimals = 18;
+    const txFee = "200";
     const initialSupply = "1000000000";
 
     // define provider and deployer
     const provider = new ethers.JsonRpcProvider(
-        process.env.RPC_ENDPOINT_URL_TESTNET ?? ""
+        process.env.RPC_ENDPOINT_URL_MAINNET ?? ""
     );
     const wallet = new ethers.Wallet(
-        process.env.PRIVATE_KEY ?? "",
+        process.env.DEPLOYER_PRIVATE_KEY ?? "",
         provider
     );
 
@@ -30,9 +31,9 @@ async function main() {
     }
 
     // deploy contract
-    const owner = process.env.OWNER_ADDRESS_TESTNET as string;
+    const owner = process.env.OWNER_ADDRESS_MAINNET as string;
 
-    const contractFactory = new ERC20Basic__factory(wallet);
+    const contractFactory = new HoldEarn__factory(wallet);
     const contract = await contractFactory.deploy(owner);
     await contract.waitForDeployment();
     const contractAddress = await contract.getAddress();

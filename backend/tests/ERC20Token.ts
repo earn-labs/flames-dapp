@@ -1,26 +1,26 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {ERC20Basic, ERC20Basic__factory} from '../typechain-types';
+import {Token, Token__factory} from '../typechain-types';
 import {HardhatEthersSigner} from "@nomicfoundation/hardhat-ethers/signers";
 
 describe("Contract", () => {
 
-    let contract: ERC20Basic;
+    let contract: Token;
     let deployer: HardhatEthersSigner;
     let owner: HardhatEthersSigner;
     let addr1: HardhatEthersSigner, addr2: HardhatEthersSigner;
     let ammpair: HardhatEthersSigner;
 
     // variables for contract creation: adjust as needed
-    const name = "MyToken";
-    const symbol = "MTK";
+    const name = "Token";
+    const symbol = "TOKEN";
     const decimals = 18;
     const initialSupply = "1000000000";
     const contractOwner = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
 
     beforeEach(async () => {
         // Fetch conract from blockchain
-        const MyContract = await ethers.getContractFactory("ERC20Basic");
+        const MyContract = await ethers.getContractFactory("Token");
         contract = await MyContract.deploy(contractOwner);
         [deployer, owner, addr1, addr2, ammpair] = await ethers.getSigners();
 
