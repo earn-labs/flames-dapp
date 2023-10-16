@@ -5,18 +5,30 @@ require("dotenv").config();
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.18",
-    settings: {
-      optimizer: {
-        enabled: true,
+    compilers: [
+      {
+        version: "0.8.20",
+        settings: {
+          optimizer: {
+            enabled: true,
+          },
+        },
       },
-    },
+      {
+        version: "0.8.18",
+        settings: {
+          optimizer: {
+            enabled: true,
+          },
+        },
+      },
+    ],
   },
   networks: {
     hardhat: {
       accounts: {
         count: 70,
-      }
+      },
     },
     ARB_MAINNET: {
       accounts: [`0x${ process.env.PRIVATE_KEY }`],
@@ -34,7 +46,6 @@ const config: HardhatUserConfig = {
       accounts: [`0x${ process.env.PRIVATE_KEY }`],
       url: `https://eth-goerli.g.alchemy.com/v2/${ process.env.ALCHEMY_API_KEY }`,
     },
-
   },
   gasReporter: {
     outputFile: "gas-report.txt",

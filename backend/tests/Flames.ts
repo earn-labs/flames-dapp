@@ -1,12 +1,11 @@
-import { expect } from "chai";
-import { ethers } from "hardhat";
-import { Flames, Token__factory, HoldEarn } from "../typechain-types";
-import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { AddressLike } from "ethers";
+import {expect} from "chai";
+import {ethers} from "hardhat";
+import {Flames, Token__factory, HoldEarn} from "../typechain-types";
+import {HardhatEthersSigner} from "@nomicfoundation/hardhat-ethers/signers";
+import {AddressLike} from "ethers";
 import {token} from "../typechain-types/@openzeppelin/contracts";
 
-let tokenAddress: AddressLike;
-let nftContractAddress: AddressLike;
+
 let deployer: HardhatEthersSigner;
 let owner: HardhatEthersSigner;
 let receiver: HardhatEthersSigner;
@@ -15,41 +14,41 @@ let others: HardhatEthersSigner[];
 
 const nftName = "Flames";
 const nftSymbol = "FLAME";
-const mintCost = ethers.parseUnits("1000000");
+const mintCost = ethers.parseUnits("100000");
 
 // function to deploy token contract
-async function deployTokenContract() {
-  const tokenFactory = await ethers.getContractFactory("HoldEarn");
-  const tokenContract = await tokenFactory.deploy(owner.address);
-  await tokenContract.waitForDeployment();
-  tokenAddress = await tokenContract.getAddress();
-  return tokenContract;
+async function deployTokenContract(ownerAddress: AddressLike) {
+  const contractFactory = await ethers.getContractFactory("HoldEarn");
+  const contract = await contractFactory.deploy(ownerAddress);
+  await contract.waitForDeployment();
+  return contract;
 }
 
 // function to deploy betting contract
-async function deployBettingContract() {
+async function deployNFTContract(ownerAddress: AddressLike, receiverAddress: AddressLike, contractAddress: AddressLike) {
   const contractFactory = await ethers.getContractFactory("Flames");
-  const contract = await contractFactory.deploy(tokenAddress, receiver.address);
+  const contract = await contractFactory.deploy(ownerAddress, receiverAddress, contractAddress);
   await contract.waitForDeployment();
-  nftContractAddress = await contract.getAddress();
   return contract;
 }
 
 describe("Tests for NFT contract", async () => {
   let nftContract: Flames;
   let tokenContract: HoldEarn;
+  let tokenAddress: AddressLike;
+  let nftContractAddress: AddressLike;
 
   describe("when nft contract is deployed", async () => {
     beforeEach(async () => {
       [deployer, owner, receiver, account, ...others] =
         await ethers.getSigners();
 
-      tokenContract = await deployTokenContract();
-      await tokenContract.waitForDeployment();
+      tokenContract = await deployTokenContract(owner.address);
       tokenAddress = await tokenContract.getAddress();
+      nftContract = await deployNFTContract(owner.address, receiver.address, tokenAddress);
+      nftContractAddress = await nftContract.getAddress();
 
-      nftContract = await deployBettingContract();
-      await nftContract.waitForDeployment();
+      await tokenContract.connect(owner).excludeFromFee(receiver.address);
     });
 
     it("returns correct token address", async () => {
@@ -74,7 +73,7 @@ describe("Tests for NFT contract", async () => {
     });
     it("returns correct owner", async () => {
       const ownerAddress = await nftContract.owner();
-      expect(ownerAddress).to.eq(deployer.address);
+      expect(ownerAddress).to.eq(owner.address);
     });
   });
 
@@ -82,30 +81,27 @@ describe("Tests for NFT contract", async () => {
     beforeEach(async () => {
       [deployer, owner, receiver, account] = await ethers.getSigners();
 
-      tokenContract = await deployTokenContract();
-      await tokenContract.waitForDeployment();
+      tokenContract = await deployTokenContract(owner.address);
       tokenAddress = await tokenContract.getAddress();
+      nftContract = await deployNFTContract(owner.address, receiver.address, tokenAddress);
+      nftContractAddress = await nftContract.getAddress();
 
-      nftContract = await deployBettingContract();
-      await nftContract.waitForDeployment();
+      await tokenContract.connect(owner).excludeFromFee(receiver.address);
+
     });
 
     it("owner can set new fee", async () => {
       const newFee = ethers.parseUnits("2000");
-      await nftContract.setFee(newFee);
+      await nftContract.connect(owner).setFee(newFee);
       const fee = await nftContract.fee();
       expect(fee).to.eq(newFee);
     });
     it("owner can set new fee address", async () => {
-      await nftContract.setFeeAddress(owner.address);
+      await nftContract.connect(owner).setFeeAddress(owner.address);
       const feeAddress = await nftContract.feeAddress();
       expect(feeAddress).to.eq(owner.address);
     });
-    it("owner can set new fee address", async () => {
-      await nftContract.setFeeAddress(owner.address);
-      const feeAddress = await nftContract.feeAddress();
-      expect(feeAddress).to.eq(owner.address);
-    });
+
     it("owner can withdraw EARN tokens from contract", async () => {
       const sentTokenAmount = ethers.parseUnits("200000");
       const fundtx = await tokenContract
@@ -119,12 +115,12 @@ describe("Tests for NFT contract", async () => {
       let contractBalance = await tokenContract.balanceOf(nftContractAddress);
       expect(contractBalance).to.be.greaterThan(0n);
 
-      const withdrawTx = await nftContract.withdrawTokens(tokenAddress, account.address);
+      const withdrawTx = await nftContract.connect(owner).withdrawTokens(tokenAddress, account.address);
       await withdrawTx.wait();
       contractBalance = await tokenContract.balanceOf(nftContractAddress);
       expect(contractBalance).to.eq(0n);
     });
-    
+
     it("owner can withdraw ANY tokens from contract", async () => {
       const anyTokenFactory = new Token__factory(deployer);
       const anyToken = await anyTokenFactory.deploy(deployer);
@@ -143,7 +139,7 @@ describe("Tests for NFT contract", async () => {
       let contractBalance = await anyToken.balanceOf(nftContractAddress);
       expect(contractBalance).to.eq(sentTokenAmount);
 
-      const withdrawTx = await nftContract.withdrawTokens(anyTokenAddress, account.address);
+      const withdrawTx = await nftContract.connect(owner).withdrawTokens(anyTokenAddress, account.address);
       await withdrawTx.wait();
       contractBalance = await anyToken.balanceOf(nftContractAddress);
       expect(contractBalance).to.eq(0n);
@@ -154,12 +150,12 @@ describe("Tests for NFT contract", async () => {
     beforeEach(async () => {
       [deployer, owner, receiver, account] = await ethers.getSigners();
 
-      tokenContract = await deployTokenContract();
-      await tokenContract.waitForDeployment();
+      tokenContract = await deployTokenContract(owner.address);
       tokenAddress = await tokenContract.getAddress();
+      nftContract = await deployNFTContract(owner.address, receiver.address, tokenAddress);
+      nftContractAddress = await nftContract.getAddress();
 
-      nftContract = await deployBettingContract();
-      await nftContract.waitForDeployment();
+      await tokenContract.connect(owner).excludeFromFee(receiver.address);
 
       const tx = await tokenContract
         .connect(owner)
@@ -177,7 +173,7 @@ describe("Tests for NFT contract", async () => {
     it("mints single token to account", async () => {
       const nftRate = await nftContract.fee();
       await tokenContract.connect(account).approve(nftContractAddress, nftRate);
-      const mintTx = await nftContract.connect(account).mint("1");
+      const mintTx = await nftContract.connect(account).safeMint("1");
       await mintTx.wait();
       const balance = await nftContract
         .connect(account)
@@ -194,7 +190,7 @@ describe("Tests for NFT contract", async () => {
         .approve(nftContractAddress, paymentAmount);
       const mintTx = await nftContract
         .connect(account)
-        .mint(quantity.toString());
+        .safeMint(quantity.toString());
       await mintTx.wait();
       const balance = await nftContract
         .connect(account)
@@ -206,16 +202,48 @@ describe("Tests for NFT contract", async () => {
       const quantity = 2n;
       const nftRate = await nftContract.fee();
       const paymentAmount = nftRate * quantity;
-      const feeAddress = await tokenContract.connect(owner).excludeFromFee(receiver.address);
+      const prevBalance = await tokenContract.balanceOf(account.address);
+
       await tokenContract
         .connect(account)
         .approve(nftContractAddress, paymentAmount);
       const mintTx = await nftContract
         .connect(account)
-        .mint(quantity.toString());
+        .safeMint(quantity.toString());
       await mintTx.wait();
-      const balance = await tokenContract.balanceOf(receiver.address);
-      expect(balance).to.eq(paymentAmount);
+      const balance = await tokenContract.balanceOf(account.address);
+      expect(balance).to.eq(prevBalance - paymentAmount);
+    });
+
+    it("sets correct token owner", async () => {
+      const quantity = 2n;
+      const nftRate = await nftContract.fee();
+      const paymentAmount = nftRate * quantity;
+      await tokenContract
+        .connect(account)
+        .approve(nftContractAddress, paymentAmount);
+      const mintTx = await nftContract
+        .connect(account)
+        .safeMint(quantity.toString());
+      await mintTx.wait();
+      expect(await nftContract
+        .ownerOf(0n)).to.eq(account.address);
+      expect(await nftContract
+        .ownerOf(1n)).to.eq(account.address);
+    });
+    it("returns correct number minted", async () => {
+      const quantity = 2n;
+      const nftRate = await nftContract.fee();
+      const paymentAmount = nftRate * quantity;
+      await tokenContract
+        .connect(account)
+        .approve(nftContractAddress, paymentAmount);
+      const mintTx = await nftContract
+        .connect(account)
+        .safeMint(quantity.toString());
+      await mintTx.wait();
+      expect(await nftContract
+        .totalSupply()).to.eq(2n);
     });
 
     it("reverts if exceeding maxBatchSize", async () => {
@@ -226,27 +254,27 @@ describe("Tests for NFT contract", async () => {
         .connect(account)
         .approve(nftContractAddress, paymentAmount);
 
-      await expect(nftContract.connect(account).mint(quantity.toString())).to.be
+      await expect(nftContract.connect(account).safeMint(quantity.toString())).to.be
         .reverted;
     });
 
     it("reverts when maximum number of nfts exceeded", async () => {
       const quantity = 20n;
       const nftRate = await nftContract.fee();
-      const paymentAmount = nftRate * quantity ;
-      
+      const paymentAmount = nftRate * quantity;
+
       for (let index = 0; index < 6; index++) {
-        await tokenContract.connect(owner).transfer(others[index].address,paymentAmount)
+        await tokenContract.connect(owner).transfer(others[index].address, paymentAmount);
         await tokenContract
-        .connect(others[index])
-        .approve(nftContractAddress, paymentAmount);
+          .connect(others[index])
+          .approve(nftContractAddress, paymentAmount);
 
         const mintTx = await nftContract
           .connect(others[index])
-          .mint(quantity.toString());
+          .safeMint(quantity.toString());
         await mintTx.wait();
       }
-      await expect(nftContract.connect(others[6]).mint(quantity.toString())).to.be
+      await expect(nftContract.connect(others[6]).safeMint(quantity.toString())).to.be
         .reverted;
     });
 
@@ -254,17 +282,17 @@ describe("Tests for NFT contract", async () => {
       const quantity = 11n;
       const nftRate = await nftContract.fee();
       const paymentAmount = nftRate * quantity;
-      await tokenContract.connect(owner).transfer(account.address,paymentAmount)
+      await tokenContract.connect(owner).transfer(account.address, paymentAmount);
       await tokenContract
         .connect(account)
         .approve(nftContractAddress, paymentAmount);
 
       const mintTx = await nftContract
         .connect(account)
-        .mint(quantity.toString());
+        .safeMint(quantity.toString());
       await mintTx.wait();
 
-      await expect(nftContract.connect(account).mint(quantity.toString())).to.be
+      await expect(nftContract.connect(account).safeMint(quantity.toString())).to.be
         .reverted;
     });
 

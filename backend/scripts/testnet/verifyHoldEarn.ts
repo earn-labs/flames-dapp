@@ -3,14 +3,9 @@ import {ethers} from "ethers";
 import * as dotenv from "dotenv";
 dotenv.config();
 
-// run this script with hardhat: npx hardhat run ./scripts/testnet/verifyERC20Reflections.ts --network ETH_GOERLI
-const name = "HOLD";
-const symbol = "EARN";
-const decimals = 18;
-const txFee = "500";
-const initialSupply = "1000000000";
-const constructorArguments = [name, symbol, process.env.OWNER_ADDRESS_TESTNET];
-const contractAddress = "0xc73b9A17da9b03258771201c3901BEf19595BDC6";
+// run this script with hardhat: npx hardhat run ./scripts/testnet/verifyHoldEarn.ts --network ETH_GOERLI
+const constructorArguments = [process.env.OWNER_ADDRESS_TESTNET];
+const contractAddress = "0xb6347F2A99CB1a431729e9D4F7e946f58E7C35C7";
 
 async function main() {
 
@@ -20,12 +15,12 @@ async function main() {
         await hre.run("verify:verify", {
             address: contractAddress,
             constructorArguments: constructorArguments,
-            contract: "contracts/ERC20Reflections.sol:ERC20Reflections"
+            contract: "contracts/HoldEarn.sol:HoldEarn"
         });
     } else {
         await hre.run("verify:verify", {
             address: contractAddress,
-            contract: "contracts/ERC20Reflections.sol:ERC20Reflections"
+            contract: "contracts/HoldEarn.sol:HoldEarn"
         });
     }
 }

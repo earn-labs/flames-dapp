@@ -261,42 +261,7 @@ describe("Contract", () => {
         });
     });
 
-    describe("Adjusting Allowance", () => {
-        let amount: bigint, prevAllowance: bigint, allowance;
-
-        beforeEach(async () => {
-            amount = ethers.parseUnits("100");
-            prevAllowance = ethers.parseUnits("100");
-
-            // approve ammpair
-            const transaction = await contract
-                .connect(owner)
-                .approve(ammpair.address, prevAllowance);
-            const receipt = await transaction.wait();
-        });
-        describe("Success", () => {
-            it("allowance is increased by correct amount", async () => {
-                await contract.connect(owner).increaseAllowance(ammpair.address, amount);
-                expect(
-                    await contract.allowance(owner.address, ammpair.address)
-                ).to.equal(prevAllowance + amount);
-            });
-
-            it("allowance is decreased by correct amount", async () => {
-                await contract.connect(owner).decreaseAllowance(ammpair.address, amount);
-                expect(
-                    await contract.allowance(owner.address, ammpair.address)
-                ).to.equal(prevAllowance - amount);
-            });
-        });
-
-        describe("Failure", () => {
-            it("reverted due to negative allowance", async () => {
-                await expect(contract.decreaseAllowance(ammpair.address, ethers.parseUnits("110"))).to
-                    .be.reverted;
-            });
-        });
-    });
+    
 
     describe("Delegated Token Transfer", () => {
         let amount: bigint, prevBalance: bigint;

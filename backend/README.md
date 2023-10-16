@@ -18,3 +18,14 @@ git clone https://github.com/trashpirate/hardhat-project-starter.git <newFolder>
 git remote set-url origin github.com/trashpirate/new-repository.git
 
 ```
+
+
+### Contracts Testnet
+
+#### Token Contract
+https://goerli.etherscan.io/address/0xb6347F2A99CB1a431729e9D4F7e946f58E7C35C7#code
+
+#### NFT Contract
+
+
+### Contracts Mainnet

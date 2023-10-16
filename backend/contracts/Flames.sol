@@ -1,32 +1,35 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.20;
 
-import "erc721a/contracts/ERC721A.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract Flames is ERC721A, Ownable {
-    uint256 public constant MAX_SUPPLY = 125;
+contract Flames is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
+    uint256 public constant MAX_SUPPLY = 1000;
     uint256 public constant BATCH_LIMIT = 20;
     uint256 public constant MAX_MINT_PER_WALLET = 20;
 
-    IERC20 public paymentToken;
+    IERC20 public immutable paymentToken;
     address public feeAddress;
-    uint256 public fee = 1000000 * 10 ** 18;
+    uint256 public fee = 100000 * 10 ** 18;
 
+    uint256 private _totalMinted;
     string private _baseTokenURI;
-    string private _contractURI;
 
     constructor(
-        address _tokenAddress,
-        address _feeAddress
-    ) ERC721A("Flames", "FLAME") {
-        feeAddress = _feeAddress;
-        paymentToken = IERC20(_tokenAddress);
+        address initialOwner,
+        address initialFeeAddress,
+        address tokenAddress
+    ) ERC721("Flames", "FLAME") Ownable(msg.sender) {
+        feeAddress = initialFeeAddress;
+        paymentToken = IERC20(tokenAddress);
         _setBaseURI(
-            "ipfs://bafybeihmeu7c5lwnsie2busw77xxquff6e7txnzyy4vuo6fo3k3cnedpmi/"
+            "ipfs://bafybeieokkbwo2hp3eqkfa5chypmevxjii275icwxnuc7dmuexi3qsuvu4/"
         );
-   
+        _transferOwnership(initialOwner);
     }
 
     // set base uri
@@ -39,24 +42,45 @@ contract Flames is ERC721A, Ownable {
         return _baseTokenURI;
     }
 
-    // mint NFT for token fee
+    // mint
     function mint(uint256 quantity) external {
-        require(quantity <= BATCH_LIMIT, "Exceeds batch limit.");
-        require(_totalMinted() + quantity <= MAX_SUPPLY, "Exceeds max supply.");
-        require(balanceOf(msg.sender) + quantity <= MAX_MINT_PER_WALLET , "Exceeds max per wallet.");
-        paymentToken.transferFrom(msg.sender, feeAddress, fee * quantity);
-        _mint(msg.sender, quantity);
-        // reverse: first mint so its checks-effects-interactions (CEI) pattern
+        require(msg.sender == tx.origin, "Caller is contract");
+        require(quantity > 0, "Quantity cannot be zero");
+        require(quantity <= BATCH_LIMIT, "Exceeds batch limit");
+        require(_totalMinted + quantity <= MAX_SUPPLY, "Exceeds max supply");
+        require(
+            balanceOf(msg.sender) + quantity <= MAX_MINT_PER_WALLET,
+            "Exceeds max per wallet"
+        );
+
+        uint256 tokenId;
+        for (uint256 index = 0; index < quantity; index++) {
+            tokenId = _totalMinted++;
+            _mint(msg.sender, tokenId);
+            _setTokenURI(tokenId, _baseTokenURI);
+        }
+
+        bool success = paymentToken.transferFrom(
+            msg.sender,
+            feeAddress,
+            fee * quantity
+        );
+        require(success, "Token transfer failed");
+    }
+
+    // total supply minted
+    function totalSupply() public view returns (uint256) {
+        return _totalMinted;
     }
 
     // set fee (only owner)
-    function setFee(uint256 _fee) external onlyOwner {
-        fee = _fee;
+    function setFee(uint256 newFee) external onlyOwner {
+        fee = newFee;
     }
 
     // set the receiver address (only owner)
-    function setFeeAddress(address _feeAddress) external onlyOwner {
-        feeAddress = _feeAddress;
+    function setFeeAddress(address newFeeAddress) external onlyOwner {
+        feeAddress = newFeeAddress;
     }
 
     // withdraw tokens from contract (only owner)
@@ -68,7 +92,17 @@ contract Flames is ERC721A, Ownable {
         uint256 amount = tokenContract.balanceOf(address(this));
         return tokenContract.transfer(receiverAddress, amount);
     }
-    
-    // withdraw ether: TODO
-    
+
+    // The following functions are overrides required by Solidity.
+    function tokenURI(
+        uint256 tokenId_
+    ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
+        return super.tokenURI(tokenId_);
+    }
+
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(ERC721, ERC721URIStorage) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
 }
