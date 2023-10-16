@@ -3,7 +3,6 @@ import {ethers} from "hardhat";
 import {Flames, Token__factory, HoldEarn} from "../typechain-types";
 import {HardhatEthersSigner} from "@nomicfoundation/hardhat-ethers/signers";
 import {AddressLike} from "ethers";
-import {token} from "../typechain-types/@openzeppelin/contracts";
 
 
 let deployer: HardhatEthersSigner;
@@ -173,7 +172,7 @@ describe("Tests for NFT contract", async () => {
     it("mints single token to account", async () => {
       const nftRate = await nftContract.fee();
       await tokenContract.connect(account).approve(nftContractAddress, nftRate);
-      const mintTx = await nftContract.connect(account).safeMint("1");
+      const mintTx = await nftContract.connect(account).mint("1");
       await mintTx.wait();
       const balance = await nftContract
         .connect(account)
@@ -190,7 +189,7 @@ describe("Tests for NFT contract", async () => {
         .approve(nftContractAddress, paymentAmount);
       const mintTx = await nftContract
         .connect(account)
-        .safeMint(quantity.toString());
+        .mint(quantity.toString());
       await mintTx.wait();
       const balance = await nftContract
         .connect(account)
@@ -209,7 +208,7 @@ describe("Tests for NFT contract", async () => {
         .approve(nftContractAddress, paymentAmount);
       const mintTx = await nftContract
         .connect(account)
-        .safeMint(quantity.toString());
+        .mint(quantity.toString());
       await mintTx.wait();
       const balance = await tokenContract.balanceOf(account.address);
       expect(balance).to.eq(prevBalance - paymentAmount);
@@ -224,7 +223,7 @@ describe("Tests for NFT contract", async () => {
         .approve(nftContractAddress, paymentAmount);
       const mintTx = await nftContract
         .connect(account)
-        .safeMint(quantity.toString());
+        .mint(quantity.toString());
       await mintTx.wait();
       expect(await nftContract
         .ownerOf(0n)).to.eq(account.address);
@@ -240,7 +239,7 @@ describe("Tests for NFT contract", async () => {
         .approve(nftContractAddress, paymentAmount);
       const mintTx = await nftContract
         .connect(account)
-        .safeMint(quantity.toString());
+        .mint(quantity.toString());
       await mintTx.wait();
       expect(await nftContract
         .totalSupply()).to.eq(2n);
@@ -254,7 +253,7 @@ describe("Tests for NFT contract", async () => {
         .connect(account)
         .approve(nftContractAddress, paymentAmount);
 
-      await expect(nftContract.connect(account).safeMint(quantity.toString())).to.be
+      await expect(nftContract.connect(account).mint(quantity.toString())).to.be
         .reverted;
     });
 
@@ -271,10 +270,10 @@ describe("Tests for NFT contract", async () => {
 
         const mintTx = await nftContract
           .connect(others[index])
-          .safeMint(quantity.toString());
+          .mint(quantity.toString());
         await mintTx.wait();
       }
-      await expect(nftContract.connect(others[6]).safeMint(quantity.toString())).to.be
+      await expect(nftContract.connect(others[6]).mint(quantity.toString())).to.be
         .reverted;
     });
 
@@ -289,10 +288,10 @@ describe("Tests for NFT contract", async () => {
 
       const mintTx = await nftContract
         .connect(account)
-        .safeMint(quantity.toString());
+        .mint(quantity.toString());
       await mintTx.wait();
 
-      await expect(nftContract.connect(account).safeMint(quantity.toString())).to.be
+      await expect(nftContract.connect(account).mint(quantity.toString())).to.be
         .reverted;
     });
 

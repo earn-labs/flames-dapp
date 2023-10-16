@@ -26,6 +26,6 @@ git remote set-url origin github.com/trashpirate/new-repository.git
 https://goerli.etherscan.io/address/0xb6347F2A99CB1a431729e9D4F7e946f58E7C35C7#code
 
 #### NFT Contract
-
+https://goerli.etherscan.io/address/0x9A62b60294833DE1D011adD9817e3fB0fD2985Ee#code
 
 ### Contracts Mainnet

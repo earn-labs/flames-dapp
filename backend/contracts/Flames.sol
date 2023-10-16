@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract Flames is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
     uint256 public constant MAX_SUPPLY = 1000;
@@ -24,6 +25,10 @@ contract Flames is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
         address initialFeeAddress,
         address tokenAddress
     ) ERC721("Flames", "FLAME") Ownable(msg.sender) {
+        require(
+            initialFeeAddress != address(0),
+            "Fee address cannot be zero address"
+        );
         feeAddress = initialFeeAddress;
         paymentToken = IERC20(tokenAddress);
         _setBaseURI(
@@ -57,7 +62,7 @@ contract Flames is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
         for (uint256 index = 0; index < quantity; index++) {
             tokenId = _totalMinted++;
             _mint(msg.sender, tokenId);
-            _setTokenURI(tokenId, _baseTokenURI);
+            _setTokenURI(tokenId, Strings.toString(tokenId));
         }
 
         bool success = paymentToken.transferFrom(
@@ -80,6 +85,10 @@ contract Flames is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
 
     // set the receiver address (only owner)
     function setFeeAddress(address newFeeAddress) external onlyOwner {
+        require(
+            newFeeAddress != address(0),
+            "Fee address cannot be zero address"
+        );
         feeAddress = newFeeAddress;
     }
 
@@ -95,9 +104,9 @@ contract Flames is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
 
     // The following functions are overrides required by Solidity.
     function tokenURI(
-        uint256 tokenId_
+        uint256 tokenId
     ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
-        return super.tokenURI(tokenId_);
+        return super.tokenURI(tokenId);
     }
 
     function supportsInterface(
