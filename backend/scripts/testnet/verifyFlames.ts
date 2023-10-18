@@ -7,7 +7,7 @@ dotenv.config();
 const TOKEN_ADDRESS = "0xb6347F2A99CB1a431729e9D4F7e946f58E7C35C7";
 
 const constructorArguments = [process.env.OWNER_ADDRESS_TESTNET, process.env.FEE_ADDRESS_TESTNET, TOKEN_ADDRESS];
-const contractAddress = "0x9A62b60294833DE1D011adD9817e3fB0fD2985Ee";
+const contractAddress = "0xb76428F222ec59418AdFFEE08D37F3D3C0a3025D";
 
 async function main() {
 
