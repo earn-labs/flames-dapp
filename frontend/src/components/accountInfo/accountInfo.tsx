@@ -98,16 +98,16 @@ export default function AccountInfo({}: Props) {
         </div>
         <div className="flex justify-between">
           <h3>NFTs: </h3>
-          <p>{nftBalance ? nftBalance : "Loading..."}</p>
+          <p>{nftsOwned ? nftsOwned.length : "Loading..."}</p>
         </div>
       </div>
-      <div>
-        <h2 className="py-2">Your Gallery</h2>
+      <h2 className="py-2">Your Gallery</h2>
+      <div className="xs:flex-col sm:flex sm:gap-4">
         {nftsOwned?.map(function (nft) {
           return (
             <div
               key={nft.id}
-              className="max-w-xs overflow-hidden rounded-md bg-white shadow"
+              className="my-4 max-w-xs overflow-hidden rounded-md bg-white shadow"
             >
               {typeof nft.url == "string" && (
                 <Image
