@@ -7,20 +7,16 @@ dotenv.config();
 
 async function main() {
 
-  const nftContractAddress = "0xb76428F222ec59418AdFFEE08D37F3D3C0a3025D";
-  const tokenContractAddress = "0xb6347F2A99CB1a431729e9D4F7e946f58E7C35C7";
+  const nftContractAddress = "0x12A961E8cC6c94Ffd0ac08deB9cde798739cF775";
+  const tokenContractAddress = "0x0b61C4f33BCdEF83359ab97673Cb5961c6435F4E";
 
   // define provider and deployer
   const provider = new ethers.JsonRpcProvider(
-    process.env.RPC_ENDPOINT_URL_TESTNET ?? ""
+    process.env.RPC_ENDPOINT_URL_MAINNET ?? ""
   );
 
   const ownerWallet = new ethers.Wallet(
-    process.env.PRIVATE_KEY ?? "",
-    provider
-  );
-  const wallet = new ethers.Wallet(
-    process.env.PRIVATE_KEYS?.split(",")[2] ?? "",
+    process.env.DEPLOYER_PRIVATE_KEY ?? "",
     provider
   );
 
@@ -47,18 +43,13 @@ async function main() {
 
 
   // approve tokens
-  const approveTx = await tokenContract.connect(wallet).approve(contractAddress, ethers.parseUnits("400000"));
+  const approveTx = await tokenContract.connect(ownerWallet).approve(contractAddress, ethers.parseUnits("100000"));
   await approveTx.wait();
 
   // mint single nft
-  const mintTx = await nftContract.connect(wallet).mint(1n);
+  const mintTx = await nftContract.connect(ownerWallet).mint(1n);
   const receipt = await mintTx.wait();
   console.log(receipt?.hash);
-
-  // mint single nft
-  const mintTx2 = await nftContract.connect(wallet).mint(2n);
-  const receipt2 = await mintTx2.wait();
-  console.log(receipt2?.hash);
 }
 
 main().catch((error) => {

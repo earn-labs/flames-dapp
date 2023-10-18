@@ -100,6 +100,19 @@ describe("Tests for NFT contract", async () => {
       const feeAddress = await nftContract.feeAddress();
       expect(feeAddress).to.eq(owner.address);
     });
+    it("owner can set max mint per wallet", async () => {
+      const newMax = 3n;
+      await nftContract.connect(owner).setMaxPerWallet(newMax);
+      const max = await nftContract.maxPerWallet();
+      expect(max).to.eq(newMax);
+    });
+    it("owner can set batch limit", async () => {
+      const newLimit = 3n;
+      await nftContract.connect(owner).setMaxPerWallet(newLimit);
+      await nftContract.connect(owner).setBatchLimit(newLimit);
+      const limit = await nftContract.batchLimit();
+      expect(limit).to.eq(newLimit);
+    });
 
     it("owner can withdraw EARN tokens from contract", async () => {
       const sentTokenAmount = ethers.parseUnits("200000");
@@ -246,7 +259,7 @@ describe("Tests for NFT contract", async () => {
     });
 
     it("reverts if exceeding maxBatchSize", async () => {
-      const quantity = 21n;
+      const quantity = 3n;
       const nftRate = await nftContract.fee();
       const paymentAmount = nftRate * quantity;
       await tokenContract
@@ -258,11 +271,13 @@ describe("Tests for NFT contract", async () => {
     });
 
     it("reverts when maximum number of nfts exceeded", async () => {
-      const quantity = 20n;
+      const quantity = 50n;
       const nftRate = await nftContract.fee();
       const paymentAmount = nftRate * quantity;
-
-      for (let index = 0; index < 6; index++) {
+      await nftContract.connect(owner).setMaxPerWallet(50n);
+      await nftContract.connect(owner).setBatchLimit(50n);
+    
+      for (let index = 0; index < 20; index++) {
         await tokenContract.connect(owner).transfer(others[index].address, paymentAmount);
         await tokenContract
           .connect(others[index])
@@ -278,7 +293,7 @@ describe("Tests for NFT contract", async () => {
     });
 
     it("reverts when maximum per wallet exceeded", async () => {
-      const quantity = 11n;
+      const quantity = 2n;
       const nftRate = await nftContract.fee();
       const paymentAmount = nftRate * quantity;
       await tokenContract.connect(owner).transfer(account.address, paymentAmount);

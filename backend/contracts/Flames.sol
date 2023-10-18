@@ -10,12 +10,12 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract Flames is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
     uint256 public constant MAX_SUPPLY = 1000;
-    uint256 public constant BATCH_LIMIT = 20;
-    uint256 public constant MAX_MINT_PER_WALLET = 20;
 
     IERC20 public immutable paymentToken;
     address public feeAddress;
     uint256 public fee = 100000 * 10 ** 18;
+    uint256 public batchLimit = 2;
+    uint256 public maxPerWallet = 2;
 
     uint256 private _totalMinted;
     string private _baseTokenURI;
@@ -51,10 +51,10 @@ contract Flames is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
     function mint(uint256 quantity) external {
         require(msg.sender == tx.origin, "Caller is contract");
         require(quantity > 0, "Quantity cannot be zero");
-        require(quantity <= BATCH_LIMIT, "Exceeds batch limit");
+        require(quantity <= batchLimit, "Exceeds batch limit");
         require(_totalMinted + quantity <= MAX_SUPPLY, "Exceeds max supply");
         require(
-            balanceOf(msg.sender) + quantity <= MAX_MINT_PER_WALLET,
+            balanceOf(msg.sender) + quantity <= maxPerWallet,
             "Exceeds max per wallet"
         );
 
@@ -90,6 +90,25 @@ contract Flames is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
             "Fee address cannot be zero address"
         );
         feeAddress = newFeeAddress;
+    }
+
+    // set the maximum number of nfts per wallet (only owner)
+    function setMaxPerWallet(uint256 newMaxMint) external onlyOwner {
+        require(
+            newMaxMint < MAX_SUPPLY,
+            "Max mint per wallet exceeds max supply"
+        );
+        maxPerWallet = newMaxMint;
+    }
+
+    // set batch limit (only owner)
+    function setBatchLimit(uint256 newLimit) external onlyOwner {
+        require(
+            newLimit <= 100,
+            "Batch limit exceeds maximum allowed"
+        );
+        require(newLimit <= maxPerWallet, "Batch limit exceeds max mint per wallet");
+        batchLimit = newLimit;
     }
 
     // withdraw tokens from contract (only owner)
