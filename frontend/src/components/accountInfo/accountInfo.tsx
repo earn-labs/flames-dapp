@@ -6,6 +6,7 @@ import { useAccount, useContractRead } from "wagmi";
 import { Alchemy, Network } from "alchemy-sdk";
 import { tokenABI } from "@/assets/tokenABI";
 import { formatEther } from "viem";
+import { xdc } from "viem/chains";
 
 const NFT_CONTRACT = process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${string}`;
 const TOKEN_CONTRACT = process.env.NEXT_PUBLIC_TOKEN_CONTRACT as `0x${string}`;
@@ -19,18 +20,20 @@ const alchemy = new Alchemy(config);
 
 interface NFTMeta {
   name: string;
-  description: number;
-  image: string;
-  attributes: any;
+  description: string;
+  url: string;
+  id: number;
 }
 
 type Props = {};
 
 export default function AccountInfo({}: Props) {
   const [tokenBalance, setTokenBalance] = useState<number | null>(null);
-  const [tokenIDs, setTokenIDs] = useState<number[] | null>(null);
-  const [imageUrls, setImageUrls] = useState<string[] | null>(null);
+  // const [tokenIDs, setTokenIDs] = useState<number[] | null>(null);
+  // const [imageUrls, setImageUrls] = useState<string[] | null>(null);
+  // const [tokenNames, setTokenNames] = useState<string[] | null>(null);
   const [nftBalance, setNftBalance] = useState<number | null>(null);
+  const [nftsOwned, setNftsOwned] = useState<NFTMeta[] | null>(null);
 
   const contractAddresses = [NFT_CONTRACT];
 
@@ -45,33 +48,32 @@ export default function AccountInfo({}: Props) {
       });
       const nftList = nfts["ownedNfts"];
 
-      let ids: number[] = [];
-      let urls: string[] = [];
+      let nftData: NFTMeta[] = [];
       for (let nft of nftList) {
-        ids.push(Number(nft.tokenId));
+        let imageURL: string = "";
         fetch(
           `https://bafybeieokkbwo2hp3eqkfa5chypmevxjii275icwxnuc7dmuexi3qsuvu4.ipfs.nftstorage.link/${nft.tokenId}`,
         )
           .then((res) => res.json())
           .then((json) => {
             const [prefix, separator, url, color, name] = json.image.split("/");
-            const imageURL = `https://bafybeifzdbsgwpnj37c3tzj4pkut3b2pgf2u75mf3zmbto657ep2ubwf6a.ipfs.nftstorage.link/${color}/${name}`;
-            urls.push(imageURL);
+            imageURL = `https://bafybeifzdbsgwpnj37c3tzj4pkut3b2pgf2u75mf3zmbto657ep2ubwf6a.ipfs.nftstorage.link/${color}/${name}`;
+            const iNFT = {
+              name: nft.title,
+              id: Number(nft.tokenId),
+              description: nft.description,
+              url: imageURL,
+            };
+            nftData.push(iNFT);
           });
       }
-      setTokenIDs(ids);
-      setImageUrls(urls);
-      setNftBalance(ids.length);
+
+      setNftBalance(nftData.length);
+      setNftsOwned(nftData);
     }
 
-    if (tokenIDs == null) {
-      getNFTs();
-    }
+    getNFTs();
   }, [isConnected]);
-
-  console.log(tokenIDs);
-  console.log(imageUrls?.[0]);
-  console.log(nftBalance);
 
   // check balance
   const {} = useContractRead({
@@ -86,19 +88,46 @@ export default function AccountInfo({}: Props) {
     },
   });
 
-  console.log(tokenBalance);
-
   return (
     <div>
-      {typeof imageUrls?.[0] == "string" && (
-        <Image
-          alt="nft"
-          src={`${imageUrls?.[0]}` as string}
-          width={200}
-          height={200}
-          layout="responsive"
-        />
-      )}
+      <div className="py-4">
+        <h2 className="pb-2 text-xl">ACCOUNT INFO</h2>
+        <div className="flex justify-between">
+          <h3>Balance: </h3>
+          <p>{tokenBalance ? tokenBalance : "Loading..."}</p>
+        </div>
+        <div className="flex justify-between">
+          <h3>NFTs: </h3>
+          <p>{nftBalance ? nftBalance : "Loading..."}</p>
+        </div>
+      </div>
+      <div>
+        <h2 className="py-2">Your Gallery</h2>
+        {nftsOwned?.map(function (nft) {
+          return (
+            <div
+              key={nft.id}
+              className="max-w-xs overflow-hidden rounded-md bg-white shadow"
+            >
+              {typeof nft.url == "string" && (
+                <Image
+                  alt={nft.name || ""}
+                  src={`${nft.url}` as string}
+                  width={200}
+                  height={200}
+                  layout="responsive"
+                />
+              )}
+              <div className="m-4 font-bold text-black">
+                {nft.name || "Loading..."}
+              </div>
+              <div className="m-4 text-black">
+                {nft.description || "Loading..."}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
