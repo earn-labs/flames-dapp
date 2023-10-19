@@ -343,7 +343,7 @@ export default function Minter({}: Props) {
         />
         <div className="m-4">
           <div className="m-1 font-bold text-black">{"FLAMES MINT"}</div>
-          <div className="m-1 text-black">{"OCT 19 | 9PM CST"}</div>
+          <div className="m-1 text-black">{"NFT Price: 100,000 EARN"}</div>
         </div>
       </div>
       {mintOpen ? (
@@ -370,7 +370,7 @@ export default function Minter({}: Props) {
         </div>
       ) : (
         <div className="flex-col justify-center gap-4 pt-4 text-center">
-          <p>GET READY TO MINT!</p>
+          <p className="mb-4">OCT 19 | 9PM CST</p>
           <div className="mx-auto my-2 h-10 w-fit rounded-md bg-white px-4 py-2 font-bold text-black hover:bg-slate-400">
             <a
               className="mx-auto"
