@@ -53,7 +53,7 @@ export default function AdminPanel({}: Props) {
       },
     ],
     watch: true,
-    cacheTime: 1000,
+
   });
 
   // set max per wallet

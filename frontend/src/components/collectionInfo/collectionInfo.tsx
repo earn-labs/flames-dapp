@@ -6,6 +6,7 @@ import { tokenABI } from "@/assets/tokenABI";
 import { nftABI } from "@/assets/nftABI";
 
 import Image from "next/image";
+import CopyToClipboard from "../copyToClipboard";
 const NFT_CONTRACT = process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${string}`;
 const TOKEN_CONTRACT = process.env.NEXT_PUBLIC_TOKEN_CONTRACT as `0x${string}`;
 
@@ -70,8 +71,8 @@ export default function CollectionInfo({}: Props) {
   }
 
   return (
-    <div className="xs:w-80 mx-auto w-full md:mr-0 md:w-60 ">
-      <div className="max-w-sm rounded-md bg-black p-8">
+    <div className="mx-auto w-full md:mr-0 ">
+      <div className="mx-auto max-w-sm rounded-md bg-black p-8 ">
         <Image
           className="mb-4 h-16 w-full overflow-hidden object-cover"
           src={"/featured_image.jpg"}
@@ -79,7 +80,13 @@ export default function CollectionInfo({}: Props) {
           height={100}
           alt="Flame NFTs"
         />
-        <h2 className="pb-2 text-xl">FLAMES</h2>
+        <h2 className="mb-4 border-b-2 border-yellow-500 pb-2 text-xl">
+          FLAMES COLLECTION
+        </h2>
+        <div className="pb-4 text-sm text-slate-600">
+          <p>Contract:</p>
+          <CopyToClipboard text={NFT_CONTRACT} copyText={NFT_CONTRACT} />
+        </div>
         <div className="flex justify-between">
           <h3>NFTs minted: </h3>
           <p>{getTotalSupplyString()}</p>
