@@ -1,7 +1,6 @@
 "use client";
 import { nftABI } from "@/assets/nftABI";
 import { tokenABI } from "@/assets/tokenABI";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 
@@ -241,7 +240,6 @@ export default function Minter({}: Props) {
             })
             .then((nfts) => {
               const nftLatest = nfts["ownedNfts"].at(-1);
-              console.log(nftLatest?.tokenId);
               const pathExists = nftLatest != undefined;
               if (pathExists) {
                 const [index, path] =
@@ -402,6 +400,7 @@ export default function Minter({}: Props) {
             width: "100%",
             height: "auto",
           }}
+          priority
         />
         <div className="m-4">
           <div className="m-1 font-bold text-black">{"FLAMES MINT"}</div>

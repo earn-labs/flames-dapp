@@ -36,8 +36,6 @@ type Props = {};
 
 export default function Nfts({}: Props) {
   const [totalSupply, setTotalSupply] = useState<number | undefined>(undefined);
-  const [nftPaths, setNftPaths] = useState<string[]>([]);
-  const [imagePath, setImagePath] = useState<string>("/logo.jpg");
   const [nftsOwned, setNftsOwned] = useState<NFTMeta[] | null>(null);
 
   // get account address
@@ -136,14 +134,6 @@ export default function Nfts({}: Props) {
   return (
     <div className="mx-auto w-full pb-8 md:ml-0 ">
       <div className="mx-auto max-w-sm rounded-md bg-black p-8">
-        {/* <Image
-          className="mb-4 h-16 w-full overflow-hidden object-cover"
-          src={"/featured_image.jpg"}
-          width={100}
-          height={100}
-          alt="Flame NFTs"
-        /> */}
-
         <h2 className="border-b-2 border-yellow-500 py-2 pb-2 text-xl uppercase">
           Your NFTs
         </h2>
@@ -162,7 +152,10 @@ export default function Nfts({}: Props) {
                         src={`${nft.path}` as string}
                         width={100}
                         height={100}
-                        layout="responsive"
+                        style={{
+                          width: "100%",
+                          height: "auto",
+                        }}
                       />
                     }
                     <div className="m-2 text-xs font-bold text-black">
