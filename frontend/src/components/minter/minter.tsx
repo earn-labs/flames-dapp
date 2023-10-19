@@ -56,6 +56,7 @@ export default function Minter({}: Props) {
   const [nftBalance, setNftBalance] = useState<number | undefined>(undefined);
   const [maxPerWallet, setMaxPerWallet] = useState<number>(2);
   const [batchLimit, setBatchLimit] = useState<number>(2);
+  const [totalSupply, setTotalSupply] = useState<number>(0);
   const [mintOpen, setMintOpen] = useState<boolean>(false);
 
   // get account address
@@ -98,7 +99,7 @@ export default function Minter({}: Props) {
     ],
     enabled: isConnected && address != null,
     watch: true,
-    cacheTime: 3000,
+    cacheTime: 500,
     onSuccess(data) {
       setTokenBalance(data[0].result);
       setApprovedAmount(data[1].result);
@@ -125,6 +126,10 @@ export default function Minter({}: Props) {
         ...nftContract,
         functionName: "maxPerWallet",
       },
+      {
+        ...nftContract,
+        functionName: "totalSupply",
+      },
     ],
     enabled: isConnected && address != null,
     watch: true,
@@ -132,8 +137,8 @@ export default function Minter({}: Props) {
     onSuccess(data) {
       setNftBalance(Number(data?.[0].result));
       setBatchLimit(Number(data?.[1].result));
-      setMintOpen(data?.[1].result ? data?.[1].result > 0 : false);
       setMaxPerWallet(Number(data?.[2].result));
+      setTotalSupply(Number(data?.[3].result));
     },
   });
 
@@ -191,7 +196,18 @@ export default function Minter({}: Props) {
   useEffect(() => {
     if (approvedAmount != undefined && approvedAmount >= transferAmount)
       mint?.();
-  }, [approvedAmount]);
+  }, [approvedAmount, approvalSuccess]);
+
+  useEffect(() => {
+    if (
+      batchLimit != undefined &&
+      batchLimit > 0 &&
+      totalSupply != undefined &&
+      totalSupply < 1000
+    )
+      setMintOpen(true);
+    else setMintOpen(false);
+  }, [batchLimit, totalSupply]);
 
   // ============================================================================
   // fetch minted nfts
@@ -330,7 +346,7 @@ export default function Minter({}: Props) {
 
   return (
     <div className="xs:w-80 mx-auto mb-8 min-w-fit flex-col justify-between rounded-lg bg-black p-8">
-      <div className="mb-4 max-w-xs overflow-hidden rounded border-2 border-white bg-white">
+      <div className="mb-4 w-full max-w-xs overflow-hidden rounded border-2 border-white bg-white">
         <Image
           src={imagePath}
           width={250}

@@ -1,12 +1,13 @@
 "use client";
 import { nftABI } from "@/assets/nftABI";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   useAccount,
   useContractReads,
   useContractWrite,
   useNetwork,
   usePrepareContractWrite,
+  useWaitForTransaction,
 } from "wagmi";
 
 type Props = {};
@@ -14,6 +15,12 @@ type Props = {};
 export default function AdminPanel({}: Props) {
   const [batchLimit, setBatchLimit] = useState<string>("");
   const [maxPerWallet, setMaxPerWallet] = useState<string>("");
+  const [actualBatchLimit, setActualBatchLimit] = useState<number | undefined>(
+    undefined,
+  );
+  const [actualMaxPerWallet, setActualMaxPerWallet] = useState<
+    number | undefined
+  >(undefined);
 
   // get account address
   const { address, isConnecting, isDisconnected, isConnected } = useAccount({});
@@ -46,7 +53,7 @@ export default function AdminPanel({}: Props) {
       },
     ],
     watch: true,
-    cacheTime: 3000,
+    cacheTime: 1000,
   });
 
   // set max per wallet
@@ -67,39 +74,52 @@ export default function AdminPanel({}: Props) {
       account: address,
       args: [BigInt(batchLimit)],
     });
-  const { write: writeBatchLimit } = useContractWrite(batchLimitConfig);
+  const { data: batchData, write: writeBatchLimit } =
+    useContractWrite(batchLimitConfig);
+
+  const { isLoading: batchLoading, isSuccess: batchSuccess } =
+    useWaitForTransaction({
+      confirmations: 1,
+      hash: batchData?.hash,
+    });
+
+  useEffect(() => {
+    if (readLimitData != undefined) {
+      setActualMaxPerWallet(Number(readLimitData?.[0].result));
+      setActualBatchLimit(Number(readLimitData?.[1].result));
+    }
+  }, [readLimitData]);
 
   return (
-    <div>
+    <div className="p-16">
       <div className="flex">
-        <div className="mx-2 flex">
-          <h4>Max Per Wallet:</h4>
+        <div className="mb-4 flex">
+          <h4 className="mr-2">Max Per Wallet:</h4>
           <p>
-            {readLimitLoading
+            {actualMaxPerWallet == undefined
               ? "Loading..."
-              : Number(readLimitData?.[0].result)}
+              : actualMaxPerWallet}
           </p>
         </div>
-        <div className="mx-2 flex">
-          <h4>Batch Limit:</h4>
+        <div className="mx-2 mb-4 flex">
+          <h4 className="mr-2">Batch Limit:</h4>
           <p>
-            {readLimitLoading
-              ? "Loading..."
-              : Number(readLimitData?.[1].result)}
+            {actualBatchLimit == undefined ? "Loading..." : actualBatchLimit}
           </p>
         </div>
       </div>
-      <div>
+      <div className="my-4">
         <form>
           <label>
             Enter max per wallet:
             <input
+              className="ml-2 w-16 rounded px-2 text-black"
               type="number"
               value={maxPerWallet}
               min={readLimitSuccess ? Number(readLimitData?.[1].result) : "0"}
               placeholder={
-                readLimitSuccess
-                  ? Number(readLimitData?.[0].result).toString()
+                actualMaxPerWallet != undefined
+                  ? actualMaxPerWallet.toString()
                   : "1"
               }
               onChange={(e) => {
@@ -109,10 +129,11 @@ export default function AdminPanel({}: Props) {
           </label>
         </form>
         <button
+          className="my-2 rounded border-2 border-white p-2 hover:cursor-pointer hover:bg-gray-800"
           disabled={
             !writeMaxPerWallet ||
-            (readLimitSuccess &&
-              Number(maxPerWallet) < Number(readLimitData?.[1].result))
+            (actualBatchLimit != undefined &&
+              Number(maxPerWallet) < actualBatchLimit)
           }
           onClick={() => {
             writeMaxPerWallet?.();
@@ -121,21 +142,19 @@ export default function AdminPanel({}: Props) {
           Set Max Per Wallet
         </button>
       </div>
-      <div>
+      <div className="my-4">
         <form>
           <label>
             Enter batch limit:
             <input
+              className="ml-2 w-16 rounded px-2 text-black"
               type="number"
               value={batchLimit}
               min="0"
-              max={Math.min(
-                20,
-                readLimitSuccess ? Number(readLimitData?.[0].result) : 20,
-              )}
+              max={Math.min(20, actualMaxPerWallet ? actualMaxPerWallet : 20)}
               placeholder={
-                readLimitSuccess
-                  ? Number(readLimitData?.[1].result).toString()
+                actualBatchLimit != undefined
+                  ? actualBatchLimit.toString()
                   : "1"
               }
               onChange={(e) => {
@@ -145,10 +164,11 @@ export default function AdminPanel({}: Props) {
           </label>
         </form>
         <button
+          className="my-2 rounded border-2 border-white p-2 hover:cursor-pointer hover:bg-gray-800"
           disabled={
             !writeBatchLimit ||
-            (readLimitSuccess &&
-              Number(readLimitData?.[0].result) < Number(batchLimit))
+            (actualMaxPerWallet != undefined &&
+              actualMaxPerWallet < Number(batchLimit))
           }
           onClick={() => {
             writeBatchLimit?.();
