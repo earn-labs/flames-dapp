@@ -6,10 +6,13 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between bg-black p-4 text-white">
-      <Navbar></Navbar>
-
-      <AccountInfo></AccountInfo>
+    <main className="bg-hero-pattern flex min-h-screen flex-col bg-scroll p-8 text-white bg-blend-darken">
+      <div className="w-full flex-col items-center justify-between">
+        <Navbar></Navbar>
+        <Minter></Minter>
+        <AccountInfo></AccountInfo>
+      </div>
     </main>
   );
 }
+

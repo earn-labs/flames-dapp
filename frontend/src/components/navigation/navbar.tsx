@@ -5,26 +5,24 @@ type Props = {};
 
 export default function Navbar({}: Props) {
   return (
-    <nav className="flex-col justify-center">
-      <div className="flex">
+    <nav className="mx-auto mb-8 mt-3 flex justify-between gap-5 align-middle md:w-3/5">
+      <div>
         <a
-          className="pointer-events-none mx-auto flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
+          className="pointer-events-none mx-auto gap-2 lg:pointer-events-auto lg:p-0"
+          href="https://buyholdearn.com"
           rel="noopener noreferrer"
         >
-          By{" "}
           <Image
-            src="/vercel.svg"
+            src="/logo.jpg"
             alt="EARN logo"
-            className="dark:invert"
-            width={100}
-            height={24}
+            className="rounded-xl"
+            width={45}
+            height={45}
             priority
           />
         </a>
       </div>
-      <div className="flex">
+      <div className="my-auto h-10 rounded-md bg-white px-4 py-2 font-bold text-black hover:bg-slate-400">
         <a
           className="mx-auto"
           href="https://app.uniswap.org/swap?outputCurrency=0x0b61C4f33BCdEF83359ab97673Cb5961c6435F4E"
@@ -32,9 +30,6 @@ export default function Navbar({}: Props) {
         >
           <p>BUY $EARN</p>
         </a>
-      </div>
-      <div className="my-5">
-        <ConnectButton />
       </div>
     </nav>
   );
