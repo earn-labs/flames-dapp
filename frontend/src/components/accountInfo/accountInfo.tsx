@@ -11,7 +11,6 @@ import {
 import { Alchemy, Network } from "alchemy-sdk";
 import { tokenABI } from "@/assets/tokenABI";
 import { formatEther } from "viem";
-import { xdc } from "viem/chains";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { nftABI } from "@/assets/nftABI";
 
@@ -20,7 +19,10 @@ const TOKEN_CONTRACT = process.env.NEXT_PUBLIC_TOKEN_CONTRACT as `0x${string}`;
 
 const config = {
   apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
-  network: Network.ETH_GOERLI,
+  network:
+    process.env.NEXT_PUBLIC_TESTNET == "true"
+      ? Network.ETH_GOERLI
+      : Network.ETH_MAINNET,
 };
 
 const alchemy = new Alchemy(config);
@@ -96,7 +98,7 @@ export default function AccountInfo({}: Props) {
     if (isLoading) {
       text = "Loading...";
     } else if (isSuccess && tokenBalance != null) {
-      text = `${tokenBalance} EARN`;
+      text = `${tokenBalance.toFixed(0)} EARN`;
     } else {
       text = "---";
     }

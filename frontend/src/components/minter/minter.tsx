@@ -5,7 +5,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 
-import { formatEther, parseUnits } from "viem";
+import { parseUnits } from "viem";
 import {
   useAccount,
   useContractReads,
@@ -21,9 +21,14 @@ const NFT_CONTRACT = process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${string}`;
 const TOKEN_CONTRACT = process.env.NEXT_PUBLIC_TOKEN_CONTRACT as `0x${string}`;
 const NFT_FEE = 100000;
 
+const contractAddresses = [NFT_CONTRACT];
+
 const config = {
   apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
-  network: Network.ETH_GOERLI,
+  network:
+    process.env.NEXT_PUBLIC_TESTNET == "true"
+      ? Network.ETH_GOERLI
+      : Network.ETH_MAINNET,
 };
 
 const alchemy = new Alchemy(config);
@@ -91,6 +96,7 @@ export default function Minter({}: Props) {
         args: [address as `0x${string}`, NFT_CONTRACT],
       },
     ],
+    enabled: isConnected && address != null,
     watch: true,
     cacheTime: 3000,
     onSuccess(data) {
@@ -120,6 +126,7 @@ export default function Minter({}: Props) {
         functionName: "maxPerWallet",
       },
     ],
+    enabled: isConnected && address != null,
     watch: true,
     cacheTime: 1000,
     onSuccess(data) {
@@ -136,7 +143,8 @@ export default function Minter({}: Props) {
     abi: tokenABI,
     functionName: "approve",
     args: [NFT_CONTRACT, transferAmount],
-    enabled: (approvedAmount != undefined &&
+    enabled: (isConnected &&
+      approvedAmount != undefined &&
       approvedAmount < transferAmount) as boolean,
   });
 
@@ -162,7 +170,10 @@ export default function Minter({}: Props) {
     ...nftContract,
     functionName: "mint",
     args: [BigInt(quantity)],
-    enabled: approvedAmount != undefined && approvedAmount >= transferAmount,
+    enabled:
+      isConnected &&
+      approvedAmount != undefined &&
+      approvedAmount >= transferAmount,
   });
   const {
     data: mintData,
@@ -197,37 +208,6 @@ export default function Minter({}: Props) {
       });
   }, []);
 
-  // fetch minted NFTs
-  useEffect(() => {
-    async function getNFTs() {
-      const contractAddresses = [NFT_CONTRACT];
-      const nfts = await alchemy.nft.getNftsForOwner(address as string, {
-        contractAddresses,
-      });
-      const nftList = nfts["ownedNfts"];
-
-      let nftData: NFTMeta[] = [];
-      for (let nft of nftList.slice(-Number(quantity))) {
-        const pathExists = nftPaths[Number(nft.tokenId)] != undefined;
-        if (pathExists) {
-          const [index, path] = nftPaths[Number(nft.tokenId)].split(": ");
-          const iNFT = {
-            name: nft.title,
-            id: Number(nft.tokenId),
-            description: nft.description,
-            path: "/images/" + path,
-          };
-          nftData.push(iNFT);
-        }
-      }
-      if (nftData.length > 0) setNftsMinted(nftData);
-      else setNftsMinted(null);
-    }
-    if (nftPaths != undefined) {
-      getNFTs();
-    }
-  }, [nftPaths, isMintSuccess]);
-
   // update transfer amount
   useEffect(() => {
     setTransferAmount(parseUnits(`${Number(quantity) * NFT_FEE}`, 18));
@@ -239,8 +219,6 @@ export default function Minter({}: Props) {
   // set image path
   useEffect(() => {
     async function getNFT() {
-      const contractAddresses = [NFT_CONTRACT];
-
       fetch("/api")
         .then((response) => response.json())
         .then((data) => {

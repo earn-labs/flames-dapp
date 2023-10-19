@@ -1,6 +1,5 @@
 // pages/api/readFile.js
 import fs from 'fs';
-import {NextApiRequest, NextApiResponse} from 'next';
 import {NextRequest, NextResponse} from 'next/server';
 import path from 'path';
 
