@@ -124,10 +124,7 @@ export default function AccountInfo({}: Props) {
         <div className="py-2">
           <ConnectButton
             accountStatus="address"
-            showBalance={{
-              smallScreen: false,
-              largeScreen: true,
-            }}
+            showBalance={true}
             chainStatus="icon"
           />
         </div>
