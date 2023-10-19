@@ -1,40 +1,34 @@
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Image from "next/image";
 
 type Props = {};
 
 export default function Navbar({}: Props) {
   return (
-    <nav className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-      <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center lg:static lg:h-auto lg:w-auto lg:bg-none">
+    <nav className="mx-auto mb-8 mt-3 flex justify-between gap-5 align-middle md:w-3/5">
+      <div>
         <a
-          className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
+          className="pointer-events-none mx-auto gap-2 lg:pointer-events-auto lg:p-0"
+          href="https://buyholdearn.com"
           rel="noopener noreferrer"
         >
-          By{" "}
           <Image
-            src="/vercel.svg"
+            src="/logo.jpg"
             alt="EARN logo"
-            className="dark:invert"
-            width={100}
-            height={24}
+            className="rounded-xl"
+            width={45}
+            height={45}
             priority
           />
         </a>
       </div>
-      <div>
+      <div className="my-auto h-10 rounded-md bg-white px-4 py-2 font-bold text-black hover:bg-slate-400">
         <a
-          className=""
+          className="mx-auto"
           href="https://app.uniswap.org/swap?outputCurrency=0x0b61C4f33BCdEF83359ab97673Cb5961c6435F4E"
           target={"_blank"}
         >
           <p>BUY $EARN</p>
         </a>
-      </div>
-      <div className="my-5">
-        <ConnectButton />
       </div>
     </nav>
   );

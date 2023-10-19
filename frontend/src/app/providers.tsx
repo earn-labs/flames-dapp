@@ -2,21 +2,13 @@
 import "@rainbow-me/rainbowkit/styles.css";
 import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
-import {
-  goerli,
-  mainnet,
-  polygon,
-  optimism,
-  arbitrum,
-  base,
-  zora,
-} from "wagmi/chains";
+import { goerli, mainnet } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 import { useEffect, useState } from "react";
 
 const { chains, publicClient } = configureChains(
-  [goerli, mainnet, polygon, optimism, arbitrum, base, zora],
+  [goerli, mainnet],
   [
     alchemyProvider({
       apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY as string,
@@ -37,8 +29,8 @@ const wagmiConfig = createConfig({
   publicClient,
 });
 
-const demoAppInfo = {
-  appName: "Rainbowkit Demo",
+const dAppInfo = {
+  appName: "Flame Minter",
 };
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -46,7 +38,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => setMounted(true), []);
   return (
     <WagmiConfig config={wagmiConfig}>
-      <RainbowKitProvider chains={chains} appInfo={demoAppInfo}>
+      <RainbowKitProvider chains={chains} appInfo={dAppInfo}>
         {mounted && children}
       </RainbowKitProvider>
     </WagmiConfig>

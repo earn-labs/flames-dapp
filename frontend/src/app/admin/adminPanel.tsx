@@ -3,12 +3,11 @@ import { nftABI } from "@/assets/nftABI";
 import React, { useState } from "react";
 import {
   useAccount,
+  useContractReads,
   useContractWrite,
   useNetwork,
   usePrepareContractWrite,
 } from "wagmi";
-
-const NFT_CONTRACT = process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${string}`;
 
 type Props = {};
 
@@ -22,14 +21,40 @@ export default function AdminPanel({}: Props) {
   // get chain
   const { chain } = useNetwork();
 
+  // define contract config
+  const nftContract = {
+    address: process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${string}`,
+    abi: nftABI,
+    chainId: chain?.id,
+  };
+
+  // read current limits
+  const {
+    data: readLimitData,
+    isSuccess: readLimitSuccess,
+    isError: readLimitError,
+    isLoading: readLimitLoading,
+  } = useContractReads({
+    contracts: [
+      {
+        ...nftContract,
+        functionName: "maxPerWallet",
+      },
+      {
+        ...nftContract,
+        functionName: "batchLimit",
+      },
+    ],
+    watch: true,
+    cacheTime: 3000,
+  });
+
   // set max per wallet
   const { config: maxPerWalletConfig, error: maxPerWalletError } =
     usePrepareContractWrite({
-      address: NFT_CONTRACT as `0x${string}`,
-      abi: nftABI,
+      ...nftContract,
       functionName: "setMaxPerWallet",
       account: address,
-      chainId: chain?.id,
       args: [BigInt(maxPerWallet)],
     });
   const { write: writeMaxPerWallet } = useContractWrite(maxPerWalletConfig);
@@ -37,17 +62,33 @@ export default function AdminPanel({}: Props) {
   // set batch limit
   const { config: batchLimitConfig, error: batchLimitError } =
     usePrepareContractWrite({
-      address: NFT_CONTRACT as `0x${string}`,
-      abi: nftABI,
+      ...nftContract,
       functionName: "setBatchLimit",
       account: address,
-      chainId: chain?.id,
       args: [BigInt(batchLimit)],
     });
   const { write: writeBatchLimit } = useContractWrite(batchLimitConfig);
 
   return (
     <div>
+      <div className="flex">
+        <div className="mx-2 flex">
+          <h4>Max Per Wallet:</h4>
+          <p>
+            {readLimitLoading
+              ? "Loading..."
+              : Number(readLimitData?.[0].result)}
+          </p>
+        </div>
+        <div className="mx-2 flex">
+          <h4>Batch Limit:</h4>
+          <p>
+            {readLimitLoading
+              ? "Loading..."
+              : Number(readLimitData?.[1].result)}
+          </p>
+        </div>
+      </div>
       <div>
         <form>
           <label>
@@ -55,8 +96,12 @@ export default function AdminPanel({}: Props) {
             <input
               type="number"
               value={maxPerWallet}
-              min={batchLimit}
-              placeholder="1"
+              min={readLimitSuccess ? Number(readLimitData?.[1].result) : "0"}
+              placeholder={
+                readLimitSuccess
+                  ? Number(readLimitData?.[0].result).toString()
+                  : "1"
+              }
               onChange={(e) => {
                 setMaxPerWallet(e.target.value);
               }}
@@ -65,7 +110,9 @@ export default function AdminPanel({}: Props) {
         </form>
         <button
           disabled={
-            !writeMaxPerWallet || Number(maxPerWallet) < Number(batchLimit)
+            !writeMaxPerWallet ||
+            (readLimitSuccess &&
+              Number(maxPerWallet) < Number(readLimitData?.[1].result))
           }
           onClick={() => {
             writeMaxPerWallet?.();
@@ -82,8 +129,15 @@ export default function AdminPanel({}: Props) {
               type="number"
               value={batchLimit}
               min="0"
-              max={"20" || maxPerWallet}
-              placeholder="1"
+              max={Math.min(
+                20,
+                readLimitSuccess ? Number(readLimitData?.[0].result) : 20,
+              )}
+              placeholder={
+                readLimitSuccess
+                  ? Number(readLimitData?.[1].result).toString()
+                  : "1"
+              }
               onChange={(e) => {
                 setBatchLimit(e.target.value);
               }}
@@ -92,7 +146,9 @@ export default function AdminPanel({}: Props) {
         </form>
         <button
           disabled={
-            !writeBatchLimit || Number(maxPerWallet) < Number(batchLimit)
+            !writeBatchLimit ||
+            (readLimitSuccess &&
+              Number(readLimitData?.[0].result) < Number(batchLimit))
           }
           onClick={() => {
             writeBatchLimit?.();
