@@ -122,7 +122,14 @@ export default function AccountInfo({}: Props) {
       <div className="max-w-sm rounded-md border-2 border-slate-400  bg-black p-4">
         <h2 className="pb-2 text-xl">ACCOUNT INFO</h2>
         <div className="py-2">
-          <ConnectButton />
+          <ConnectButton
+            accountStatus="address"
+            showBalance={{
+              smallScreen: false,
+              largeScreen: true,
+            }}
+            chainStatus="icon"
+          />
         </div>
 
         <div className="flex justify-between">
