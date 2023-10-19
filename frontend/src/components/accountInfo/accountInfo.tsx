@@ -119,8 +119,10 @@ export default function AccountInfo({}: Props) {
 
   return (
     <div className="w-full ">
-      <div className="max-w-sm rounded-md border-2 border-slate-400  bg-black p-4">
-        <h2 className="pb-2 text-xl">ACCOUNT INFO</h2>
+      <div className="mx-auto max-w-sm rounded-md  bg-black p-8 md:ml-0">
+        <h2 className="mb-4 border-b-2 border-yellow-500 pb-2 text-xl">
+          ACCOUNT INFO
+        </h2>
         <div className="py-2">
           <ConnectButton
             accountStatus="address"

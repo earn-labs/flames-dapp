@@ -55,9 +55,9 @@ export default function Minter({}: Props) {
   );
   const [nftBalance, setNftBalance] = useState<number | undefined>(undefined);
   const [maxPerWallet, setMaxPerWallet] = useState<number>(2);
-  const [batchLimit, setBatchLimit] = useState<number>(2);
+  const [batchLimit, setBatchLimit] = useState<number>(0);
   const [totalSupply, setTotalSupply] = useState<number>(0);
-  const [mintOpen, setMintOpen] = useState<boolean>(false);
+  const [buttonText, setButtonText] = useState<string>("MINT");
 
   // get account address
   const { address, isConnecting, isDisconnected, isConnected } = useAccount({});
@@ -99,11 +99,11 @@ export default function Minter({}: Props) {
     ],
     enabled: isConnected && address != null,
     watch: true,
-    cacheTime: 500,
-    onSuccess(data) {
-      setTokenBalance(data[0].result);
-      setApprovedAmount(data[1].result);
-    },
+    // onSuccess(data) {
+    //   console.log(data[1].result);
+    //   setTokenBalance(data[0].result);
+    //   setApprovedAmount(data[1].result);
+    // },
   });
 
   // read nft balance
@@ -133,14 +133,16 @@ export default function Minter({}: Props) {
     ],
     enabled: isConnected && address != null,
     watch: true,
-    cacheTime: 1000,
-    onSuccess(data) {
-      setNftBalance(Number(data?.[0].result));
-      setBatchLimit(Number(data?.[1].result));
-      setMaxPerWallet(Number(data?.[2].result));
-      setTotalSupply(Number(data?.[3].result));
-    },
   });
+
+  useEffect(() => {
+    if (nftData != undefined) {
+      setNftBalance(Number(nftData?.[0].result));
+      setBatchLimit(Number(nftData?.[1].result));
+      setMaxPerWallet(Number(nftData?.[2].result));
+      setTotalSupply(Number(nftData?.[3].result));
+    }
+  }, [nftData]);
 
   // approving funds
   const { config: approvalConfig } = usePrepareContractWrite({
@@ -148,27 +150,27 @@ export default function Minter({}: Props) {
     abi: tokenABI,
     functionName: "approve",
     args: [NFT_CONTRACT, transferAmount],
-    enabled: (isConnected &&
+    enabled: (Number(quantity) > 0 &&
+      isConnected &&
       approvedAmount != undefined &&
       approvedAmount < transferAmount) as boolean,
   });
 
-  const {
-    data: approvedData,
-    error: approvedError,
-    isError: isApprovedError,
-    isSuccess: isApprovedSuccess,
-    write: approve,
-  } = useContractWrite(approvalConfig);
+  const { data: approvedData, write: approve } =
+    useContractWrite(approvalConfig);
 
-  const {
-    data: approvalData,
-    isLoading: approvalLoading,
-    isSuccess: approvalSuccess,
-  } = useWaitForTransaction({
-    confirmations: 1,
-    hash: approvedData?.hash,
-  });
+  const { isLoading: approvalLoading, isSuccess: approvalSuccess } =
+    useWaitForTransaction({
+      confirmations: 1,
+      hash: approvedData?.hash,
+    });
+
+  useEffect(() => {
+    if (accountData != undefined) {
+      setTokenBalance(accountData[0].result);
+      setApprovedAmount(accountData[1].result);
+    }
+  }, [accountData]);
 
   // mint nfts
   const { config: mintConfig } = usePrepareContractWrite({
@@ -176,6 +178,7 @@ export default function Minter({}: Props) {
     functionName: "mint",
     args: [BigInt(quantity)],
     enabled:
+      Number(quantity) > 0 &&
       isConnected &&
       approvedAmount != undefined &&
       approvedAmount >= transferAmount,
@@ -196,18 +199,7 @@ export default function Minter({}: Props) {
   useEffect(() => {
     if (approvedAmount != undefined && approvedAmount >= transferAmount)
       mint?.();
-  }, [approvedAmount, approvalSuccess]);
-
-  useEffect(() => {
-    if (
-      batchLimit != undefined &&
-      batchLimit > 0 &&
-      totalSupply != undefined &&
-      totalSupply < 1000
-    )
-      setMintOpen(true);
-    else setMintOpen(false);
-  }, [batchLimit, totalSupply]);
+  }, [approvedAmount]);
 
   // ============================================================================
   // fetch minted nfts
@@ -226,7 +218,8 @@ export default function Minter({}: Props) {
 
   // update transfer amount
   useEffect(() => {
-    setTransferAmount(parseUnits(`${Number(quantity) * NFT_FEE}`, 18));
+    if (Number(quantity) > 0)
+      setTransferAmount(parseUnits(`${Number(quantity) * NFT_FEE}`, 18));
   }, [quantity]);
 
   // ============================================================================
@@ -271,14 +264,28 @@ export default function Minter({}: Props) {
     }
   }, [isMintLoading, isMintSuccess, nftPaths]);
 
+  useEffect(() => {
+    if (isMintLoading) setButtonText("Minting...");
+    else if (approvalLoading) setButtonText("Approving Funds...");
+    else if (
+      Number(quantity) > 0 &&
+      approvedAmount != undefined &&
+      approvedAmount >= transferAmount
+    )
+      setButtonText("MINT NOW");
+    else setButtonText("MINT");
+  }, [
+    isMintLoading,
+    approvalLoading,
+    approvedAmount,
+    transferAmount,
+    quantity,
+  ]);
+
   function mintButton() {
-    if (isDisconnected && mintOpen) {
-      return (
-        <div>
-          <ConnectButton />
-        </div>
-      );
-    } else if (mintOpen) {
+    if (isDisconnected && batchLimit) {
+      return <div>Connect your wallet to mint</div>;
+    } else if (batchLimit) {
       // mint is enabled
       // =====================================================
       if (tokenBalance != undefined && tokenBalance < transferAmount) {
@@ -310,10 +317,6 @@ export default function Minter({}: Props) {
         // SOLD OUT
       } else {
         // minting enabled
-        let buttonText: String = "MINT";
-        if (isMintLoading) buttonText = "Minting...";
-        else if (approvalLoading) buttonText = "Approving Funds...";
-
         return (
           <button
             className="rounded-xl bg-white px-5 py-3 font-bold text-black hover:bg-slate-300"
@@ -344,25 +347,9 @@ export default function Minter({}: Props) {
     }
   }
 
-  return (
-    <div className="xs:w-80 mx-auto mb-8 min-w-fit flex-col justify-between rounded-lg bg-black p-8">
-      <div className="mb-4 w-full max-w-xs overflow-hidden rounded border-2 border-white bg-white">
-        <Image
-          src={imagePath}
-          width={250}
-          height={250}
-          alt="Flame NFTs"
-          style={{
-            width: "100%",
-            height: "auto",
-          }}
-        />
-        <div className="m-4">
-          <div className="m-1 font-bold text-black">{"FLAMES MINT"}</div>
-          <div className="m-1 text-black">{"NFT Price: 100,000 EARN"}</div>
-        </div>
-      </div>
-      {mintOpen ? (
+  function mintPanel(canMint: number) {
+    if (canMint) {
+      return (
         <div className="pt-2">
           <div className="my-4 justify-center text-center">
             <form>
@@ -384,7 +371,9 @@ export default function Minter({}: Props) {
           </div>
           <div className="flex justify-center">{mintButton()}</div>
         </div>
-      ) : (
+      );
+    } else {
+      return (
         <div className="flex-col justify-center gap-4 pt-4 text-center">
           <p className="mb-4">OCT 19 | 9PM CST</p>
           <div className="mx-auto my-2 h-10 w-fit rounded-md bg-white px-4 py-2 font-bold text-black hover:bg-slate-400">
@@ -397,7 +386,29 @@ export default function Minter({}: Props) {
             </a>
           </div>
         </div>
-      )}
+      );
+    }
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-sm flex-col justify-between rounded-lg bg-black p-8 md:max-w-none">
+      <div className="mx-auto mb-4 w-full max-w-xs overflow-hidden rounded border-2 border-white bg-white">
+        <Image
+          src={imagePath}
+          width={250}
+          height={250}
+          alt="Flame NFTs"
+          style={{
+            width: "100%",
+            height: "auto",
+          }}
+        />
+        <div className="m-4">
+          <div className="m-1 font-bold text-black">{"FLAMES MINT"}</div>
+          <div className="m-1 text-black">{"NFT Price: 100,000 EARN"}</div>
+        </div>
+      </div>
+      {mintPanel(batchLimit)}
     </div>
   );
 }

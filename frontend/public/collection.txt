@@ -1,6 +1,6 @@
 0: ZERO/flame_white_794.png
-2: YELLOW/flame_yellow_46.png
 1: WHITE/flame_white_227.png
+2: YELLOW/flame_yellow_46.png
 3: WHITE/flame_white_779.png
 4: WHITE/flame_white_776.png
 5: WHITE/flame_white_199.png

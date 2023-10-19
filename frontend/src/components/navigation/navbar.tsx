@@ -4,10 +4,10 @@ type Props = {};
 
 export default function Navbar({}: Props) {
   return (
-    <nav className="mx-auto mb-8 mt-3 flex justify-between gap-5 align-middle md:w-3/5">
+    <nav className="mx-auto mb-8 mt-3 flex justify-between gap-5 align-middle md:w-full">
       <div className="my-auto h-fit w-fit flex-row rounded-md border-2 border-white bg-white font-bold text-black hover:bg-slate-400 sm:w-36 sm:justify-between">
         <a
-          className="pointer-events-none mx-auto flex items-center text-right align-middle text-lg uppercase sm:gap-4 lg:pointer-events-auto lg:p-0"
+          className="pointer-events-auto mx-auto flex items-center text-right align-middle text-lg uppercase sm:gap-4 lg:p-0"
           href="https://buyholdearn.com"
           rel="noopener noreferrer"
         >
@@ -25,7 +25,7 @@ export default function Navbar({}: Props) {
 
       <div className="my-auto h-fit w-fit flex-row rounded-md border-2 border-white bg-white font-bold text-black hover:bg-slate-400 sm:w-40 sm:justify-between">
         <a
-          className="pointer-events-none mx-auto flex h-10 items-center align-middle text-lg uppercase sm:gap-1 sm:text-center lg:pointer-events-auto lg:p-0 "
+          className="pointer-events-auto mx-auto flex h-10 items-center align-middle text-lg uppercase sm:gap-1 sm:text-center lg:p-0 "
           href="https://opensea.io/collection/earnflames"
           rel="noopener noreferrer"
         >
@@ -42,7 +42,7 @@ export default function Navbar({}: Props) {
       </div>
       <div className="my-auto h-fit w-fit flex-row rounded-md border-2 border-white bg-white font-bold text-black hover:bg-slate-400 sm:w-44 sm:justify-between">
         <a
-          className="pointer-events-none mx-auto flex h-10 items-center align-middle text-lg uppercase sm:gap-1 sm:text-center lg:pointer-events-auto lg:p-0 "
+          className="pointer-events-auto mx-auto flex h-10 items-center align-middle text-lg uppercase sm:gap-1 sm:text-center lg:p-0 "
           href="https://app.uniswap.org/swap?outputCurrency=0x0b61C4f33BCdEF83359ab97673Cb5961c6435F4E"
           rel="noopener noreferrer"
         >

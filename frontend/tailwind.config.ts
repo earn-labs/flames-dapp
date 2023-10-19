@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       backgroundImage: {
-        'hero-pattern': "url('/FLAMES.jpg')",
+        'hero-pattern': "url('/FLAMES_dark.jpg')",
       },
       fontFamily: {
         body: ['IBM Plex Sans']
