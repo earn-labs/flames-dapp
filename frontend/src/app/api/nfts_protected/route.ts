@@ -1,13 +1,11 @@
 import path from "path";
 import fs from "fs";
-import { NextApiRequest, NextApiResponse } from "next";
 import jwt from "jsonwebtoken";
 import {NextRequest, NextResponse} from "next/server";
 
 const secretKey = process.env.NEXT_PUBLIC_JWT_SECRET_KEY as string
 
 export async function GET(req: NextRequest) {
-  console.log(req.headers.get('authorization'))
   const token = req.headers.get('authorization')?.replace("Bearer ", "");
   if (!token) {
     return Response.json({ error: "Unauthorized" });

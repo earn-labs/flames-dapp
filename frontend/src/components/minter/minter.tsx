@@ -214,14 +214,14 @@ export default function Minter({}: Props) {
   const [nftPaths, setNftPaths] = useState<string[]>([]);
   const [imagePath, setImagePath] = useState<string>("/logo.jpg");
 
-  // fetch all paths
-  useEffect(() => {
-    fetch("/api/nfts")
-      .then((response) => response.json())
-      .then((data) => {
-        setNftPaths(data.lines);
-      });
-  }, []);
+  // // fetch all paths
+  // useEffect(() => {
+  //   fetch("/api/nfts_protected")
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       setNftPaths(data.lines);
+  //     });
+  // }, []);
 
   // update transfer amount
   useEffect(() => {
@@ -242,7 +242,6 @@ export default function Minter({}: Props) {
       const headers = {
         Authorization: `Bearer ${token}`,
       };
-
       fetch("/api/nfts_protected", { headers })
         .then((response) => response.json())
         .then((data) => {
