@@ -1,17 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useAccount, useContractRead, useNetwork } from "wagmi";
-
-import { tokenABI } from "@/assets/tokenABI";
+import { useAccount, useContractReads, useNetwork } from "wagmi";
 import { nftABI } from "@/assets/nftABI";
-
 import Image from "next/image";
-
 import { Alchemy, Network } from "alchemy-sdk";
-import CopyToClipboard from "../copyToClipboard";
+
+import jwt from "jwt-simple";
 
 const NFT_CONTRACT = process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${string}`;
-const TOKEN_CONTRACT = process.env.NEXT_PUBLIC_TOKEN_CONTRACT as `0x${string}`;
 
 const contractAddresses = [NFT_CONTRACT];
 
@@ -36,6 +32,9 @@ type Props = {};
 
 export default function Nfts({}: Props) {
   const [totalSupply, setTotalSupply] = useState<number | undefined>(undefined);
+  const [maxPerWallet, setMaxPerWallet] = useState<number | undefined>(
+    undefined,
+  );
   const [nftsOwned, setNftsOwned] = useState<NFTMeta[] | null>(null);
 
   // get account address
@@ -51,28 +50,43 @@ export default function Nfts({}: Props) {
     chainId: chain?.id,
   };
 
-  // read current limits
-  const { data, isSuccess, isError, isLoading } = useContractRead({
-    ...nftContract,
-    functionName: "totalSupply",
+  const { data, isSuccess, isError, isLoading } = useContractReads({
+    contracts: [
+      {
+        ...nftContract,
+        functionName: "maxPerWallet",
+      },
+      {
+        ...nftContract,
+        functionName: "totalSupply",
+      },
+    ],
+    enabled: isConnected && address != null,
     watch: true,
-    cacheTime: 1000,
   });
 
   useEffect(() => {
     if (data != undefined) {
-      setTotalSupply(Number(data));
+      setMaxPerWallet(Number(data[0].result));
+      setTotalSupply(Number(data[1].result));
     }
   }, [data]);
 
   // set image path
   useEffect(() => {
     async function getNFT() {
-      fetch("/api")
+      let token: string = jwt.encode(
+        { foo: "bar" },
+        process.env.NEXT_PUBLIC_JWT_SECRET_KEY as string,
+      );
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      fetch("/api/nfts_protected", { headers })
         .then((response) => response.json())
         .then((data) => {
           return data.lines;
-          // setNftPaths(data.lines);
         })
         .then((nftpaths) => {
           alchemy.nft
@@ -80,30 +94,29 @@ export default function Nfts({}: Props) {
               contractAddresses,
             })
             .then((nfts) => {
-              let nftArray: NFTMeta[] = [
-                {
-                  name: "Flame #?",
-                  id: 0,
-                  description: "",
-                  path: "/unrevealed.jpg",
-                },
-                {
-                  name: "Flame #?",
-                  id: 1,
-                  description: "",
-                  path: "/unrevealed.jpg",
-                },
-              ];
-              for (let index = 1; index <= 2; index++) {
+              let nftArray: NFTMeta[] = [];
+              const maxShow = maxPerWallet ? maxPerWallet : 2;
+              for (let index = 1; index <= maxShow; index++) {
                 const nft = nfts["ownedNfts"].at(-index);
                 const pathExists = nft != undefined;
                 if (pathExists) {
                   const [suffix, path] =
                     nftpaths[Number(nft.tokenId)].split(": ");
-                  nftArray[index - 1].name = nft.title;
-                  nftArray[index - 1].description = nft.description;
-                  nftArray[index - 1].id = Number(nft.tokenId);
-                  nftArray[index - 1].path = "/images/" + path;
+                  let iNft: NFTMeta = {
+                    name: nft.title,
+                    description: nft.description,
+                    id: Number(nft.tokenId),
+                    path: "/images/" + path,
+                  };
+                  nftArray.push(iNft);
+                } else {
+                  let iNft: NFTMeta = {
+                    name: "Flame #?",
+                    description: "nft.description",
+                    id: index * 1000,
+                    path: "/unrevealed.jpg",
+                  };
+                  nftArray.push(iNft);
                 }
               }
               setNftsOwned(nftArray);
@@ -113,32 +126,17 @@ export default function Nfts({}: Props) {
 
     if (isConnected) {
       getNFT();
-    } else {
-      setNftsOwned([
-        {
-          name: "Flame #?",
-          id: 0,
-          description: "",
-          path: "/unrevealed.jpg",
-        },
-        {
-          name: "Flame #?",
-          id: 1,
-          description: "",
-          path: "/unrevealed.jpg",
-        },
-      ]);
     }
-  }, [isConnected, totalSupply, address]);
+  }, [isConnected, totalSupply, address, maxPerWallet]);
 
   return (
     <div className="mx-auto w-full pb-8 md:ml-0 ">
-      <div className="mx-auto max-w-sm rounded-md bg-black p-8">
-        <h2 className="border-b-2 border-yellow-500 py-2 pb-2 text-xl uppercase">
+      <div className="mx-auto max-w-sm rounded-md bg-black p-8 sm:w-full ">
+        <h2 className="border-b-2 border-yellow-500 pb-2 text-xl uppercase">
           Your NFTs
         </h2>
         <div className="my-4 min-h-max">
-          <div className="grid grid-cols-2 place-content-center gap-4 ">
+          <div className="grid grid-cols-3 place-content-center gap-4 ">
             {nftsOwned != null &&
               nftsOwned.map(function (nft) {
                 return (
