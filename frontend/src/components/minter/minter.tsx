@@ -3,6 +3,7 @@ import { nftABI } from "@/assets/nftABI";
 import { tokenABI } from "@/assets/tokenABI";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import jwt from "jwt-simple";
 
 import { parseUnits } from "viem";
 import {
@@ -179,6 +180,8 @@ export default function Minter({}: Props) {
     enabled:
       Number(quantity) > 0 &&
       isConnected &&
+      nftBalance != undefined &&
+      nftBalance + Number(quantity) < maxPerWallet &&
       approvedAmount != undefined &&
       approvedAmount >= transferAmount,
   });
@@ -196,7 +199,12 @@ export default function Minter({}: Props) {
     });
 
   useEffect(() => {
-    if (approvedAmount != undefined && approvedAmount >= transferAmount)
+    if (
+      approvedAmount != undefined &&
+      approvedAmount >= transferAmount &&
+      nftBalance != undefined &&
+      nftBalance + Number(quantity) < maxPerWallet
+    )
       mint?.();
   }, [approvedAmount]);
 
@@ -208,7 +216,7 @@ export default function Minter({}: Props) {
 
   // fetch all paths
   useEffect(() => {
-    fetch("/api")
+    fetch("/api/nfts")
       .then((response) => response.json())
       .then((data) => {
         setNftPaths(data.lines);
@@ -227,11 +235,18 @@ export default function Minter({}: Props) {
   // set image path
   useEffect(() => {
     async function getNFT() {
-      fetch("/api")
+      let token: string = jwt.encode(
+        { foo: "bar" },
+        process.env.NEXT_PUBLIC_JWT_SECRET_KEY as string,
+      );
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      fetch("/api/nfts_protected", { headers })
         .then((response) => response.json())
         .then((data) => {
           return data.lines;
-          // setNftPaths(data.lines);
         })
         .then((nftpaths) => {
           alchemy.nft

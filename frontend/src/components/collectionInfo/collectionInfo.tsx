@@ -71,10 +71,10 @@ export default function CollectionInfo({}: Props) {
   }
 
   return (
-    <div className="mx-auto w-full md:mr-0 ">
+    <div className="mx-auto w-full pb-8 md:mr-0">
       <div className="mx-auto max-w-sm rounded-md bg-black p-8 ">
         <Image
-          className="mb-4 h-16 w-full overflow-hidden object-cover"
+          className="mb-4 h-20 w-full overflow-hidden object-cover sm:h-auto"
           src={"/featured_image.jpg"}
           width={100}
           height={100}
