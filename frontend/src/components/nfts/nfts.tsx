@@ -1,22 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import {
-  useAccount,
-  useContractRead,
-  useContractReads,
-  useNetwork,
-} from "wagmi";
-
-import { tokenABI } from "@/assets/tokenABI";
+import { useAccount, useContractReads, useNetwork } from "wagmi";
 import { nftABI } from "@/assets/nftABI";
-
 import Image from "next/image";
-
 import { Alchemy, Network } from "alchemy-sdk";
-import CopyToClipboard from "../copyToClipboard";
+
+import jwt from "jwt-simple";
 
 const NFT_CONTRACT = process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${string}`;
-const TOKEN_CONTRACT = process.env.NEXT_PUBLIC_TOKEN_CONTRACT as `0x${string}`;
 
 const contractAddresses = [NFT_CONTRACT];
 
@@ -84,11 +75,18 @@ export default function Nfts({}: Props) {
   // set image path
   useEffect(() => {
     async function getNFT() {
-      fetch("/api")
+      let token: string = jwt.encode(
+        { foo: "bar" },
+        process.env.NEXT_PUBLIC_JWT_SECRET_KEY as string,
+      );
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      fetch("/api/nfts_protected", { headers })
         .then((response) => response.json())
         .then((data) => {
           return data.lines;
-          // setNftPaths(data.lines);
         })
         .then((nftpaths) => {
           alchemy.nft
@@ -138,7 +136,7 @@ export default function Nfts({}: Props) {
           Your NFTs
         </h2>
         <div className="my-4 min-h-max">
-          <div className="grid grid-cols-2 place-content-center gap-4 ">
+          <div className="grid grid-cols-3 place-content-center gap-4 ">
             {nftsOwned != null &&
               nftsOwned.map(function (nft) {
                 return (
