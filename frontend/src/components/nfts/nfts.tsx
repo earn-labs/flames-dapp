@@ -111,7 +111,7 @@ export default function Nfts({}: Props) {
                   nftArray.push(iNft);
                 } else {
                   let iNft: NFTMeta = {
-                    name: "nft.title",
+                    name: "Flame #?",
                     description: "nft.description",
                     id: index * 1000,
                     path: "/unrevealed.jpg",
