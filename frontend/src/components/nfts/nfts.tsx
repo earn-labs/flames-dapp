@@ -4,6 +4,7 @@ import { useAccount, useContractReads, useNetwork } from "wagmi";
 import { nftABI } from "@/assets/nftABI";
 import Image from "next/image";
 import { Alchemy, Network } from "alchemy-sdk";
+import Link from "next/link";
 
 import jwt from "jwt-simple";
 
@@ -113,7 +114,7 @@ export default function Nfts({}: Props) {
                   let iNft: NFTMeta = {
                     name: "Flame #?",
                     description: "nft.description",
-                    id: index * 1000,
+                    id: index + 1100,
                     path: "/unrevealed.jpg",
                   };
                   nftArray.push(iNft);
@@ -139,27 +140,36 @@ export default function Nfts({}: Props) {
           <div className="grid grid-cols-3 place-content-center gap-4 ">
             {nftsOwned != null &&
               nftsOwned.map(function (nft) {
+                let hover: string = "";
+                if (nft.id <= 1000) hover = "  hover:border-yellow-500";
                 return (
-                  <div
+                  <Link
                     key={nft.id}
-                    className="my-2 overflow-hidden rounded-md border-2 border-white bg-white shadow"
+                    href={`https://opensea.io/assets/ethereum/${NFT_CONTRACT}/${nft.id}`}
                   >
-                    {
-                      <Image
-                        alt={nft.name || ""}
-                        src={`${nft.path}` as string}
-                        width={100}
-                        height={100}
-                        style={{
-                          width: "100%",
-                          height: "auto",
-                        }}
-                      />
-                    }
-                    <div className="m-2 text-xs font-bold text-black">
-                      {nft.name}
+                    <div
+                      className={
+                        "my-2 overflow-hidden rounded-md border-2 border-white bg-white shadow" +
+                        hover
+                      }
+                    >
+                      {
+                        <Image
+                          alt={nft.name || ""}
+                          src={`${nft.path}` as string}
+                          width={100}
+                          height={100}
+                          style={{
+                            width: "100%",
+                            height: "auto",
+                          }}
+                        />
+                      }
+                      <div className="m-2 text-xs font-bold text-black">
+                        {nft.name}
+                      </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
           </div>
