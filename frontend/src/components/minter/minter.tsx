@@ -304,7 +304,7 @@ export default function Minter({}: Props) {
         // insufficient balance - inactive
         return (
           <button
-            className="rounded-xl bg-slate-500 px-5 py-3 text-slate-300"
+            className="pointer-events-auto rounded-xl bg-slate-500 px-5 py-3 text-slate-300"
             disabled={true}
             onClick={(e) => {}}
           >
@@ -318,7 +318,7 @@ export default function Minter({}: Props) {
         // max per wallet exceeded
         return (
           <button
-            className="rounded-xl bg-slate-500 px-5 py-3 text-slate-300"
+            className="pointer-events-auto rounded-xl bg-slate-500 px-5 py-3 text-slate-300"
             disabled={true}
             onClick={(e) => {}}
           >
@@ -331,7 +331,7 @@ export default function Minter({}: Props) {
         // minting enabled
         return (
           <button
-            className="rounded-xl bg-white px-5 py-3 font-bold text-black hover:bg-slate-300"
+            className="pointer-events-auto rounded-xl bg-white px-5 py-3 font-bold text-black hover:bg-slate-300"
             disabled={
               isMintLoading ||
               approvalLoading ||
