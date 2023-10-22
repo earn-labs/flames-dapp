@@ -181,7 +181,7 @@ export default function Minter({}: Props) {
       Number(quantity) > 0 &&
       isConnected &&
       nftBalance != undefined &&
-      nftBalance + Number(quantity) < maxPerWallet &&
+      nftBalance + Number(quantity) <= maxPerWallet &&
       approvedAmount != undefined &&
       approvedAmount >= transferAmount,
   });
