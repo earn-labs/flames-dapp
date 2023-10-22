@@ -8,11 +8,11 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <main className="bg-hero-pattern flex min-h-screen flex-col bg-scroll p-8 text-white bg-blend-darken">
+    <main className="flex min-h-screen flex-col bg-hero-pattern bg-scroll p-8 text-white bg-blend-darken">
       <div className="mx-auto w-full flex-col items-center justify-between xl:w-4/5 2xl:w-3/4">
         <Navbar></Navbar>
         <div className="grid w-full grid-cols-1 justify-between gap-4 md:grid-cols-[28%_40%_28%]">
-          <div className="flex-col content-between">
+          <div className="flex-col justify-between ">
             <CollectionInfo></CollectionInfo>
             <AccountInfo></AccountInfo>
           </div>
