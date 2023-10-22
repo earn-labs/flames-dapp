@@ -131,7 +131,7 @@ export default function Nfts({}: Props) {
   }, [isConnected, totalSupply, address, maxPerWallet]);
 
   return (
-    <div className="mx-auto w-full pb-8 md:ml-0 ">
+    <div className="mx-auto h-fit w-full pb-8 md:ml-0">
       <div className="mx-auto max-w-sm rounded-md bg-black p-8 sm:w-full ">
         <h2 className="border-b-2 border-yellow-500 pb-2 text-xl uppercase">
           Your NFTs
