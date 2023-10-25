@@ -6,8 +6,6 @@ import Image from "next/image";
 import { Alchemy, Network } from "alchemy-sdk";
 import Link from "next/link";
 
-import jwt from "jwt-simple";
-
 const NFT_CONTRACT = process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${string}`;
 
 const contractAddresses = [NFT_CONTRACT];
@@ -76,53 +74,42 @@ export default function Nfts({}: Props) {
   // set image path
   useEffect(() => {
     async function getNFT() {
-      let token: string = jwt.encode(
-        { foo: "bar" },
-        process.env.NEXT_PUBLIC_JWT_SECRET_KEY as string,
-      );
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
+      const nfts = await alchemy.nft.getNftsForOwner(address as string, {
+        contractAddresses,
+      });
 
-      fetch("/api/nfts_protected", { headers })
-        .then((response) => response.json())
-        .then((data) => {
-          return data.lines;
-        })
-        .then((nftpaths) => {
-          alchemy.nft
-            .getNftsForOwner(address as string, {
-              contractAddresses,
-            })
-            .then((nfts) => {
-              let nftArray: NFTMeta[] = [];
-              const maxShow = maxPerWallet ? maxPerWallet : 2;
-              for (let index = 1; index <= maxShow; index++) {
-                const nft = nfts["ownedNfts"].at(-index);
-                const pathExists = nft != undefined;
-                if (pathExists) {
-                  const [suffix, path] =
-                    nftpaths[Number(nft.tokenId)].split(": ");
-                  let iNft: NFTMeta = {
-                    name: nft.title,
-                    description: nft.description,
-                    id: Number(nft.tokenId),
-                    path: "/images/" + path,
-                  };
-                  nftArray.push(iNft);
-                } else {
-                  let iNft: NFTMeta = {
-                    name: "Flame #?",
-                    description: "nft.description",
-                    id: index + 1100,
-                    path: "/unrevealed.jpg",
-                  };
-                  nftArray.push(iNft);
-                }
-              }
-              setNftsOwned(nftArray);
-            });
-        });
+      let nftArray: NFTMeta[] = [];
+      const maxShow = maxPerWallet ? maxPerWallet : 2;
+      for (let index = 1; index <= maxShow; index++) {
+        const nft = nfts["ownedNfts"].at(-index);
+        if (nft != undefined) {
+          let imageURL: string = "/unrevealed.jpg";
+
+          const res = await fetch(
+            `https://bafybeieokkbwo2hp3eqkfa5chypmevxjii275icwxnuc7dmuexi3qsuvu4.ipfs.nftstorage.link/${nft.tokenId}`,
+          );
+          const json = await res.json();
+          const [prefix, separator, url, color, name] = json.image.split("/");
+          imageURL = `https://bafybeifzdbsgwpnj37c3tzj4pkut3b2pgf2u75mf3zmbto657ep2ubwf6a.ipfs.nftstorage.link/${color}/${name}`;
+
+          let iNft: NFTMeta = {
+            name: nft.title,
+            description: nft.description,
+            id: Number(nft.tokenId),
+            path: imageURL,
+          };
+          nftArray.push(iNft);
+        } else {
+          let iNft: NFTMeta = {
+            name: "Flame #?",
+            description: "nft.description",
+            id: index + 1100,
+            path: "/unrevealed.jpg",
+          };
+          nftArray.push(iNft);
+        }
+      }
+      setNftsOwned(nftArray);
     }
 
     if (isConnected) {

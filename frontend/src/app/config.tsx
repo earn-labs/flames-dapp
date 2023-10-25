@@ -4,11 +4,6 @@ import { goerli, mainnet } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 
-type myWagmiConfig = {
-  config: any;
-  chains: any;
-};
-
 export default function getWagmiConfig(useTest: string) {
   if (useTest == "true") {
     const { chains, publicClient } = configureChains(
