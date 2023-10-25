@@ -83,5 +83,5 @@ artifacts
 gas-report.txt
 
 
-#log files
-collection/logs.txt
+#nft files
+collection/*
