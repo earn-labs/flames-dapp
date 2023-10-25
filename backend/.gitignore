@@ -81,3 +81,7 @@ templates/evm/core/pages/api
 cache
 artifacts
 gas-report.txt
+
+
+#log files
+collection/logs.txt
