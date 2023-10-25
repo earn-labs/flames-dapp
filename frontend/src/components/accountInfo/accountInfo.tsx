@@ -1,12 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
-import {
-  useAccount,
-  useContractRead,
-  useContractReads,
-  useNetwork,
-} from "wagmi";
+import { useAccount, useContractRead, useNetwork } from "wagmi";
 
 import { Alchemy, Network } from "alchemy-sdk";
 import { tokenABI } from "@/assets/tokenABI";

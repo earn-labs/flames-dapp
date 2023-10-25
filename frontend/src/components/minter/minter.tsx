@@ -3,7 +3,6 @@ import { nftABI } from "@/assets/nftABI";
 import { tokenABI } from "@/assets/tokenABI";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import jwt from "jwt-simple";
 
 import { parseUnits } from "viem";
 import {
@@ -59,6 +58,8 @@ export default function Minter({}: Props) {
   const [totalSupply, setTotalSupply] = useState<number>(0);
   const [buttonText, setButtonText] = useState<string>("MINT");
 
+  const [imagePath, setImagePath] = useState<string>("/logo.jpg");
+
   // get account address
   const { address, isConnecting, isDisconnected, isConnected } = useAccount({});
 
@@ -99,11 +100,6 @@ export default function Minter({}: Props) {
     ],
     enabled: isConnected && address != null,
     watch: true,
-    // onSuccess(data) {
-    //   console.log(data[1].result);
-    //   setTokenBalance(data[0].result);
-    //   setApprovedAmount(data[1].result);
-    // },
   });
 
   // read nft balance
@@ -206,22 +202,7 @@ export default function Minter({}: Props) {
       nftBalance + Number(quantity) < maxPerWallet
     )
       mint?.();
-  }, [approvedAmount]);
-
-  // ============================================================================
-  // fetch minted nfts
-  const [nftsMinted, setNftsMinted] = useState<NFTMeta[] | null>(null);
-  const [nftPaths, setNftPaths] = useState<string[]>([]);
-  const [imagePath, setImagePath] = useState<string>("/logo.jpg");
-
-  // // fetch all paths
-  // useEffect(() => {
-  //   fetch("/api/nfts_protected")
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       setNftPaths(data.lines);
-  //     });
-  // }, []);
+  }, [approvalSuccess]);
 
   // update transfer amount
   useEffect(() => {
@@ -235,36 +216,24 @@ export default function Minter({}: Props) {
   // set image path
   useEffect(() => {
     async function getNFT() {
-      let token: string = jwt.encode(
-        { foo: "bar" },
-        process.env.NEXT_PUBLIC_JWT_SECRET_KEY as string,
-      );
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-      fetch("/api/nfts_protected", { headers })
-        .then((response) => response.json())
-        .then((data) => {
-          return data.lines;
-        })
-        .then((nftpaths) => {
-          alchemy.nft
-            .getNftsForOwner(address as string, {
-              contractAddresses,
-            })
-            .then((nfts) => {
-              const nftLatest = nfts["ownedNfts"].at(-1);
-              const pathExists = nftLatest != undefined;
-              if (pathExists) {
-                const [index, path] =
-                  nftpaths[Number(nftLatest.tokenId)].split(": ");
-                setImagePath("/images/" + path);
-              } else {
-                console.log("nft fetch failed");
-                setImagePath("/logo.jpg");
-              }
-            });
-        });
+      const nfts = await alchemy.nft.getNftsForOwner(address as string, {
+        contractAddresses,
+      });
+      const nftLatest = nfts["ownedNfts"].at(-1);
+      if (nftLatest != undefined) {
+        let imageURL: string = "/unrevealed.jpg";
+
+        const res = await fetch(
+          `https://bafybeieokkbwo2hp3eqkfa5chypmevxjii275icwxnuc7dmuexi3qsuvu4.ipfs.nftstorage.link/${nftLatest.tokenId}`,
+        );
+        const json = await res.json();
+        const [prefix, separator, url, color, name] = json.image.split("/");
+        imageURL = `https://bafybeifzdbsgwpnj37c3tzj4pkut3b2pgf2u75mf3zmbto657ep2ubwf6a.ipfs.nftstorage.link/${color}/${name}`;
+        setImagePath(imageURL);
+      } else {
+        console.log("nft fetch failed");
+        setImagePath("/logo.jpg");
+      }
     }
 
     if (isMintLoading && isConnected) {
@@ -274,7 +243,7 @@ export default function Minter({}: Props) {
     } else {
       setImagePath("/logo.jpg");
     }
-  }, [isMintLoading, isMintSuccess, nftPaths]);
+  }, [isMintLoading, isMintSuccess]);
 
   useEffect(() => {
     if (isMintLoading) setButtonText("Minting...");
@@ -425,4 +394,3 @@ export default function Minter({}: Props) {
     </div>
   );
 }
-
