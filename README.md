@@ -54,7 +54,7 @@ $ npm run start
 
 Contributions, issues and feature requests are welcome!
 
-Feel free to check [issues page](https://github.com/trashpirate/plot-minter/issues). 
+Feel free to check [issues page](https://github.com/trashpirate/flame-minter/issues). 
 
 ## Show your support
 
