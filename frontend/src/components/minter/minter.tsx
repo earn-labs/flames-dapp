@@ -1,10 +1,10 @@
 "use client";
-import { nftABI } from "@/assets/nftABI";
-import { tokenABI } from "@/assets/tokenABI";
-import React, { useEffect, useState } from "react";
+import {nftABI} from "@/assets/nftABI";
+import {tokenABI} from "@/assets/tokenABI";
+import React, {useEffect, useState} from "react";
 import Image from "next/image";
 
-import { parseUnits } from "viem";
+import {parseUnits} from "viem";
 import {
   useAccount,
   useContractReads,
@@ -14,10 +14,10 @@ import {
   useWaitForTransaction,
 } from "wagmi";
 
-import { Alchemy, Network } from "alchemy-sdk";
+import {Alchemy, Network} from "alchemy-sdk";
 
-const NFT_CONTRACT = process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${string}`;
-const TOKEN_CONTRACT = process.env.NEXT_PUBLIC_TOKEN_CONTRACT as `0x${string}`;
+const NFT_CONTRACT = process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${ string }`;
+const TOKEN_CONTRACT = process.env.NEXT_PUBLIC_TOKEN_CONTRACT as `0x${ string }`;
 const NFT_FEE = 100000;
 
 const contractAddresses = [NFT_CONTRACT];
@@ -61,10 +61,10 @@ export default function Minter({}: Props) {
   const [imagePath, setImagePath] = useState<string>("/logo.jpg");
 
   // get account address
-  const { address, isConnecting, isDisconnected, isConnected } = useAccount({});
+  const {address, isConnecting, isDisconnected, isConnected} = useAccount({});
 
   // get chain
-  const { chain } = useNetwork();
+  const {chain} = useNetwork();
 
   // define token contract config
   const tokenContract = {
@@ -90,12 +90,12 @@ export default function Minter({}: Props) {
       {
         ...tokenContract,
         functionName: "balanceOf",
-        args: [address as `0x${string}`],
+        args: [address as `0x${ string }`],
       },
       {
         ...tokenContract,
         functionName: "allowance",
-        args: [address as `0x${string}`, NFT_CONTRACT],
+        args: [address as `0x${ string }`, NFT_CONTRACT],
       },
     ],
     enabled: isConnected && address != null,
@@ -112,7 +112,7 @@ export default function Minter({}: Props) {
       {
         ...nftContract,
         functionName: "balanceOf",
-        args: [address as `0x${string}`],
+        args: [address as `0x${ string }`],
       },
       {
         ...nftContract,
@@ -141,8 +141,8 @@ export default function Minter({}: Props) {
   }, [nftData]);
 
   // approving funds
-  const { config: approvalConfig } = usePrepareContractWrite({
-    address: TOKEN_CONTRACT as `0x${string}`,
+  const {config: approvalConfig} = usePrepareContractWrite({
+    address: TOKEN_CONTRACT as `0x${ string }`,
     abi: tokenABI,
     functionName: "approve",
     args: [NFT_CONTRACT, transferAmount],
@@ -152,10 +152,10 @@ export default function Minter({}: Props) {
       approvedAmount < transferAmount) as boolean,
   });
 
-  const { data: approvedData, write: approve } =
+  const {data: approvedData, write: approve} =
     useContractWrite(approvalConfig);
 
-  const { isLoading: approvalLoading, isSuccess: approvalSuccess } =
+  const {isLoading: approvalLoading, isSuccess: approvalSuccess} =
     useWaitForTransaction({
       confirmations: 1,
       hash: approvedData?.hash,
@@ -169,7 +169,7 @@ export default function Minter({}: Props) {
   }, [accountData]);
 
   // mint nfts
-  const { config: mintConfig } = usePrepareContractWrite({
+  const {config: mintConfig} = usePrepareContractWrite({
     ...nftContract,
     functionName: "mint",
     args: [BigInt(quantity)],
@@ -188,7 +188,7 @@ export default function Minter({}: Props) {
     write: mint,
   } = useContractWrite(mintConfig);
 
-  const { isLoading: isMintLoading, isSuccess: isMintSuccess } =
+  const {isLoading: isMintLoading, isSuccess: isMintSuccess} =
     useWaitForTransaction({
       confirmations: 1,
       hash: mintData?.hash,
@@ -207,7 +207,7 @@ export default function Minter({}: Props) {
   // update transfer amount
   useEffect(() => {
     if (Number(quantity) > 0)
-      setTransferAmount(parseUnits(`${Number(quantity) * NFT_FEE}`, 18));
+      setTransferAmount(parseUnits(`${ Number(quantity) * NFT_FEE }`, 18));
   }, [quantity]);
 
   // ============================================================================
@@ -224,11 +224,11 @@ export default function Minter({}: Props) {
         let imageURL: string = "/unrevealed.jpg";
 
         const res = await fetch(
-          `https://bafybeieokkbwo2hp3eqkfa5chypmevxjii275icwxnuc7dmuexi3qsuvu4.ipfs.nftstorage.link/${nftLatest.tokenId}`,
+          `https://bafybeieokkbwo2hp3eqkfa5chypmevxjii275icwxnuc7dmuexi3qsuvu4.ipfs.nftstorage.link/${ nftLatest.tokenId }`,
         );
         const json = await res.json();
         const [prefix, separator, url, color, name] = json.image.split("/");
-        imageURL = `https://bafybeifzdbsgwpnj37c3tzj4pkut3b2pgf2u75mf3zmbto657ep2ubwf6a.ipfs.nftstorage.link/${color}/${name}`;
+        imageURL = `https://bafybeifzdbsgwpnj37c3tzj4pkut3b2pgf2u75mf3zmbto657ep2ubwf6a.ipfs.nftstorage.link/${ color }/${ name }`;
         setImagePath(imageURL);
       } else {
         console.log("nft fetch failed");
@@ -291,7 +291,7 @@ export default function Minter({}: Props) {
             disabled={true}
             onClick={(e) => {}}
           >
-            {`Max. ${maxPerWallet} NFTs/Wallet`}
+            {`Max. ${ maxPerWallet } NFTs/Wallet`}
           </button>
         );
         // TODO: no more nfts to mint
@@ -331,7 +331,7 @@ export default function Minter({}: Props) {
   function mintPanel(canMint: number) {
     if (canMint) {
       return (
-        <div className="pt-2">
+        <div className="pt-2 ">
           <div className="my-4 justify-center text-center">
             <form>
               <label>
@@ -372,7 +372,7 @@ export default function Minter({}: Props) {
   }
 
   return (
-    <div className="mx-auto h-fit w-full max-w-sm flex-col justify-between rounded-lg bg-black p-8 md:max-w-none">
+    <div className="mx-auto h-full w-full max-w-sm flex-col justify-between rounded-lg bg-black px-8 py-16 md:max-w-none">
       <div className="mx-auto mb-4 w-full max-w-xs overflow-hidden rounded border-2 border-white bg-white">
         <Image
           src={imagePath}
