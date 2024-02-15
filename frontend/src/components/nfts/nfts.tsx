@@ -1,12 +1,12 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { useAccount, useContractReads, useNetwork } from "wagmi";
-import { nftABI } from "@/assets/nftABI";
+import React, {useEffect, useState} from "react";
+import {useAccount, useContractReads, useNetwork} from "wagmi";
+import {nftABI} from "@/assets/nftABI";
 import Image from "next/image";
-import { Alchemy, Network } from "alchemy-sdk";
+import {Alchemy, Network} from "alchemy-sdk";
 import Link from "next/link";
 
-const NFT_CONTRACT = process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${string}`;
+const NFT_CONTRACT = process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${ string }`;
 
 const contractAddresses = [NFT_CONTRACT];
 
@@ -37,10 +37,10 @@ export default function Nfts({}: Props) {
   const [nftsOwned, setNftsOwned] = useState<NFTMeta[] | null>(null);
 
   // get account address
-  const { address, isConnecting, isDisconnected, isConnected } = useAccount({});
+  const {address, isConnecting, isDisconnected, isConnected} = useAccount({});
 
   // get chain
-  const { chain } = useNetwork();
+  const {chain} = useNetwork();
 
   // define token contract config
   const nftContract = {
@@ -49,7 +49,7 @@ export default function Nfts({}: Props) {
     chainId: chain?.id,
   };
 
-  const { data, isSuccess, isError, isLoading } = useContractReads({
+  const {data, isSuccess, isError, isLoading} = useContractReads({
     contracts: [
       {
         ...nftContract,
@@ -86,11 +86,11 @@ export default function Nfts({}: Props) {
           let imageURL: string = "/unrevealed.jpg";
 
           const res = await fetch(
-            `https://bafybeieokkbwo2hp3eqkfa5chypmevxjii275icwxnuc7dmuexi3qsuvu4.ipfs.nftstorage.link/${nft.tokenId}`,
+            `https://bafybeieokkbwo2hp3eqkfa5chypmevxjii275icwxnuc7dmuexi3qsuvu4.ipfs.nftstorage.link/${ nft.tokenId }`,
           );
           const json = await res.json();
           const [prefix, separator, url, color, name] = json.image.split("/");
-          imageURL = `https://bafybeifzdbsgwpnj37c3tzj4pkut3b2pgf2u75mf3zmbto657ep2ubwf6a.ipfs.nftstorage.link/${color}/${name}`;
+          imageURL = `https://bafybeifzdbsgwpnj37c3tzj4pkut3b2pgf2u75mf3zmbto657ep2ubwf6a.ipfs.nftstorage.link/${ color }/${ name }`;
 
           let iNft: NFTMeta = {
             name: nft.title,
@@ -118,8 +118,8 @@ export default function Nfts({}: Props) {
   }, [isConnected, totalSupply, address, maxPerWallet]);
 
   return (
-    <div className="mx-auto h-fit w-full pb-8 md:ml-0">
-      <div className="mx-auto max-w-sm rounded-md bg-black p-8 sm:w-full ">
+    <div className="mx-auto h-full w-full pb-8 md:ml-0">
+      <div className="mx-auto max-w-sm rounded-md bg-black p-8 sm:w-full h-full">
         <h2 className="border-b-2 border-yellow-500 pb-2 text-xl uppercase">
           Your NFTs
         </h2>
@@ -132,7 +132,7 @@ export default function Nfts({}: Props) {
                 return (
                   <Link
                     key={nft.id}
-                    href={`https://rarible.com/token/${NFT_CONTRACT}:${nft.id}`}
+                    href={`https://rarible.com/token/${ NFT_CONTRACT }:${ nft.id }`}
                   >
                     <div
                       className={
@@ -143,7 +143,7 @@ export default function Nfts({}: Props) {
                       {
                         <Image
                           alt={nft.name || ""}
-                          src={`${nft.path}` as string}
+                          src={`${ nft.path }` as string}
                           width={100}
                           height={100}
                           style={{
