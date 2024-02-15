@@ -51,7 +51,7 @@ export default function CollectionInfo({}: Props) {
     if (isLoading) {
       text = "Loading...";
     } else if (isSuccess && totalSupply != undefined) {
-      text = `${ totalSupply }`;
+      text = `${ totalSupply - 1 }`;
     } else {
       text = "---";
     }
