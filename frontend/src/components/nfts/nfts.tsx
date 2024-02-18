@@ -79,7 +79,7 @@ export default function Nfts({}: Props) {
       });
 
       let nftArray: NFTMeta[] = [];
-      const maxShow = maxPerWallet ? maxPerWallet : 2;
+      const maxShow = maxPerWallet != undefined && maxPerWallet <= 10 ? maxPerWallet : 10;
       for (let index = 1; index <= maxShow; index++) {
         const nft = nfts["ownedNfts"].at(-index);
         if (nft != undefined) {
