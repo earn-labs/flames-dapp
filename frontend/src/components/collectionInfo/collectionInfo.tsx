@@ -1,22 +1,22 @@
 "use client";
-import React, {useEffect, useState} from "react";
-import {useContractRead, useNetwork} from "wagmi";
+import React, { useEffect, useState } from "react";
+import { useContractRead, useNetwork } from "wagmi";
 
-import {tokenABI} from "@/assets/tokenABI";
-import {nftABI} from "@/assets/nftABI";
+import { tokenABI } from "@/assets/tokenABI";
+import { nftABI } from "@/assets/nftABI";
 
 import Image from "next/image";
 import CopyToClipboard from "../copyToClipboard";
-const NFT_CONTRACT = process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${ string }`;
-const TOKEN_CONTRACT = process.env.NEXT_PUBLIC_TOKEN_CONTRACT as `0x${ string }`;
+const NFT_CONTRACT = process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${string}`;
+const TOKEN_CONTRACT = process.env.NEXT_PUBLIC_TOKEN_CONTRACT as `0x${string}`;
 
 type Props = {};
 
-export default function CollectionInfo({}: Props) {
+export default function CollectionInfo({ }: Props) {
   const [totalSupply, setTotalSupply] = useState<number | undefined>(undefined);
 
   // get chain
-  const {chain} = useNetwork();
+  const { chain } = useNetwork();
 
   // define token contract config
   const tokenContract = {
@@ -33,7 +33,7 @@ export default function CollectionInfo({}: Props) {
   };
 
   // read current limits
-  const {data, isSuccess, isError, isLoading} = useContractRead({
+  const { data, isSuccess, isError, isLoading } = useContractRead({
     ...nftContract,
     functionName: "totalSupply",
     watch: true,
@@ -51,7 +51,7 @@ export default function CollectionInfo({}: Props) {
     if (isLoading) {
       text = "Loading...";
     } else if (isSuccess && totalSupply != undefined) {
-      text = `${ totalSupply - 1 }`;
+      text = `${totalSupply - 1}`;
     } else {
       text = "---";
     }
@@ -63,7 +63,7 @@ export default function CollectionInfo({}: Props) {
     if (isLoading) {
       text = "Loading...";
     } else if (isSuccess && totalSupply != undefined) {
-      text = `${ 1000 - totalSupply }`;
+      text = `${1000 - totalSupply}`;
     } else {
       text = "---";
     }
@@ -104,21 +104,22 @@ export default function CollectionInfo({}: Props) {
               <tr>
                 <td>BLUE</td>
                 <td>10 %</td>
+                <td>{`50${String.fromCharCode(8239)}K EARN`}</td>
               </tr>
               <tr>
                 <td>YELLOW</td>
                 <td>8 %</td>
-                <td>{`100${ String.fromCharCode(8239) }K EARN`}</td>
+                <td>{`100${String.fromCharCode(8239)}K EARN`}</td>
               </tr>
               <tr>
                 <td>RED</td>
                 <td>2 %</td>
-                <td>{`1${ String.fromCharCode(8239) }M EARN`}</td>
+                <td>{`1${String.fromCharCode(8239)}M EARN`}</td>
               </tr>
               <tr>
                 <td>NOVA</td>
                 <td>0.5 %</td>
-                <td>{`1.5${ String.fromCharCode(8239) }M EARN`}</td>
+                <td>{`1.5${String.fromCharCode(8239)}M EARN`}</td>
               </tr>
             </tbody>
           </table>
