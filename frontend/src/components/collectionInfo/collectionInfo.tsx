@@ -104,7 +104,7 @@ export default function CollectionInfo({ }: Props) {
               <tr>
                 <td>BLUE</td>
                 <td>10 %</td>
-                <td>{`50${String.fromCharCode(8239)}K EARN`}</td>
+                <td>{`25${String.fromCharCode(8239)}K EARN`}</td>
               </tr>
               <tr>
                 <td>YELLOW</td>
