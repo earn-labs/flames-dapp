@@ -5,7 +5,7 @@
 ![Static Badge](https://img.shields.io/badge/next-v13.4.4-blue)
 [![Documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)](https://github.com/trashpirate/flame-minter#readme)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/trashpirate/flame-minter/graphs/commit-activity)
-[![License: MIT](https://img.shields.io/github/license/trashpirate/flame-minter)](https://github.com/trashpirate/flame-minter/blob/master/LICENSE)
+[![License: MIT](https://img.shields.io/github/license/trashpirate/hold-earn)](https://github.com/trashpirate/flame-minter/blob/master/LICENSE)
 [![Twitter: 0xTrashPirate](https://img.shields.io/twitter/follow/0xTrashPirate.svg?style=social)](https://twitter.com/0xTrashPirate)
 
 > **Flame Minter** is a NFT minting DApp for the crypto project Hold ($EARN) including smart contracts based on ERC721 and ERC20 standard deployed to the Ethereum blockchain. Hold ($EARN) was created to bring back reflection tokens to Ethereum, just better. The EARN token is a ERC20 token with a new implmentation to provide reflections to users that is more gas efficient and does not have any contract sells like most reflection tokens. $EARN was launched on 10/10/2023. The NFT collection Flames, viewable also on Rarible includes 1000 pieces of artwork created using Midjourney showing unique flames. There are 5 categories - white (795), blue (100), yellow (80), red (20), and novas (5). 100K $EARN tokens are required to mint a FLAME. Flames give holders access to unique membership opportunities (access to whitelists, events, etc.) and a chance to win prizes. The DApp was deployed on Vercel.
