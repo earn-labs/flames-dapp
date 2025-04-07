@@ -7,6 +7,7 @@ import { nftABI } from "@/assets/nftABI";
 
 import Image from "next/image";
 import CopyToClipboard from "../copyToClipboard";
+import Link from "next/link";
 const NFT_CONTRACT = process.env.NEXT_PUBLIC_NFT_CONTRACT as `0x${string}`;
 const TOKEN_CONTRACT = process.env.NEXT_PUBLIC_TOKEN_CONTRACT as `0x${string}`;
 
@@ -131,6 +132,11 @@ export default function CollectionInfo({ }: Props) {
         <div className="flex justify-between  w-48">
           <h3>NFTs remaining: </h3>
           <p>{getNftsRemainingString()}</p>
+        </div>
+        <div>
+          <Link href="https://app.pwn.xyz/collection/mainnet/0x12A961E8cC6c94Ffd0ac08deB9cde798739cF775/assets" target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block mt-4 px-4 py-2 bg-yellow-500 border-yellow-500 text-white rounded-xl shadow transform transition-transform duration-200 hover:scale-105 font-bold">NFT Lending</Link>
         </div>
       </div>
     </div>
